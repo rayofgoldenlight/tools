@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Project: Umnik</title>
+<link rel="icon" type="image/x-icon" href="https://i.postimg.cc/WpBMQmVy/gl-ll.png">
+<style>
+  body { font-family: "Georgia", serif; margin: 0; padding: 20px; background: #fffdf8; color: #222; }
+  h1, h2 { text-align: center; font-weight: normal; color: #222; }
+  h1 { border-bottom: 2px solid #f0d879; padding-bottom: 10px; margin-bottom: 30px; }
+  .container { max-width: 1000px; margin: auto; }
+  .section { background: #ffffff; padding: 20px; margin: 20px 0; border-radius: 12px; border: 1px solid #e6e2d3; box-shadow: 2px 2px 6px rgba(0,0,0,0.05); }
+  .section h2 { background: #fdf5d9; padding: 8px 12px; border-left: 4px solid #f0d879; border-radius: 6px; font-size: 1.2em; margin-bottom: 15px; }
+  /* === COLLAPSIBLE BUTTON UPGRADE === */
+
+  .top-links button.collapsible {
+  display: block;
+  margin: 12px auto; /* block-level + auto margins = centered */
+}
+
+.collapsible {
+  display: inline-block; 
+  margin: 0 auto 12px auto;   /* centers the button itself */
+  background: linear-gradient(135deg, #f7f4ec, #fdf5d9);
+  font-size: 1em;
+  position: relative;
+  padding: 10px 18px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  text-align: center;         /* text inside button centered */
+  transition: background 0.3s ease;
+  width: fit-content;
+}
+
+.collapsible::after {
+  content: "♪";
+  float: right;
+  font-size: 1.1em;
+  color: #f0d879;
+  transition: transform 0.3s ease;
+}
+
+.collapsible.active::after {
+  transform: rotate(90deg);
+}
+  .collapsible:hover { background: #f0e9d2; }
+  /* === CONTENT BOX INSIDE COLLAPSIBLE === */
+.content {
+  text-align: left;   /* instructions align left */
+  background: #fffef9;
+  border-left: 3px solid #f0d879;
+  padding: 15px;
+  border-radius: 10px;
+  display: none;      /* start closed */
+  animation: fadeIn 0.5s ease;
+}
+
+  .score { font-weight: bold; font-size: 1.1em; color: #222; }
+  table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.95em; }
+  td, th { border: 1px solid #ddd; padding: 6px 10px; text-align: left; }
+  th { background: #fdf5d9; font-weight: normal; color: #333; }
+  .bar { background: #f7f4ec; border-radius: 6px; overflow: hidden; margin: 4px 0; height: 12px; }
+  .bar-fill { height: 100%; background: #f0d879; width: 0; transition: width 1s ease-out; }
+  .timeline { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 12px; }
+  .chord-block { background: #fdf5d9; border: 1px solid #f0d879; padding: 10px 14px; border-radius: 10px; box-shadow: 2px 2px 4px rgba(0,0,0,0.05); flex: 0 0 auto; text-align: center; }
+  .chord-name { font-size: 1em; color: #111; }
+  .chord-time { font-size: 0.8em; color: #555; margin-top: 2px; }
+  #inputArea { margin-bottom: 20px; text-align: center; }
+  #jsonInput { width: 100%; height: 200px; font-family: monospace; padding: 10px; border: 1px solid #ccc; border-radius: 8px; }
+  #renderBtn { margin-top: 10px; padding: 10px 20px; font-size: 1em; border: none; background: #f0d879; border-radius: 8px; cursor: pointer; }
+  #renderBtn:hover { background: #e8c95e; }
+  /* === TOP LINKS NEW LOOK === */
+.top-links {
+  background: linear-gradient(135deg, #fffdf8, #fdf5d9);
+  border: 2px solid #f0d879;
+  padding: 20px;
+  border-radius: 16px;
+  margin-bottom: 40px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  position: relative;
+  overflow: hidden;
+}   
+
+/* subtle animated background notes */
+.top-links::before {
+  content: "♫ ♪ ♫";
+  position: absolute;
+  font-size: 2.5em;
+  color: rgba(240, 216, 121, 0.15);
+  top: 20px;
+  left: 20px;
+  animation: floatNotes 8s ease-in-out infinite;
+}
+
+.top-links::after {
+  content: "♪ ♩ ♬";
+  position: absolute;
+  font-size: 2.8em;
+  color: rgba(240, 216, 121, 0.12);
+  bottom: 10px;
+  right: 20px;
+  animation: floatNotes 10s ease-in-out infinite;
+}
+
+.resource-links {
+  text-align: center;   /* center only this row */
+  margin-bottom: 20px;
+}
+
+/* Style links consistently */
+.resource-links a {
+  display: inline-block;
+  margin: 5px 15px;
+  text-decoration: none;
+  color: #111;
+  font-weight: bold;
+  padding: 6px 12px;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+}
+.resource-links a:hover {
+  color: #f0d879;
+  background: rgba(240, 216, 121, 0.1);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  transform: scale(1.05);
+}
+
+@keyframes floatNotes {
+  0%   { transform: translateY(0) rotate(0deg); }
+  50%  { transform: translateY(-20px) rotate(6deg); }
+  100% { transform: translateY(0) rotate(0deg); }
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.top-links h2 {
+  font-family: "Georgia", serif;
+  font-size: 1.5em;
+  letter-spacing: 1px;
+  color: #111;
+  margin-bottom: 15px;
+  text-shadow: 1px 1px 2px rgba(240, 216, 121, 0.4);
+  text-align: center;
+}
+
+.top-links a {
+  margin: 0 12px;
+  text-decoration: none;
+  color: #111;
+  font-weight: bold;
+  padding: 6px 12px;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.top-links a:hover {
+  color: #f0d879;
+  background: rgba(240, 216, 121, 0.1);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  transform: scale(1.05);
+}
+
+/* Genius Section Visual Enhancements */
+.genius-status {
+  display: inline-block;
+  padding: 6px 14px;
+  border-radius: 12px;
+  font-weight: bold;
+  color: #fff;
+  background: #f0d879; /* soft yellow */
+  margin-right: 10px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+.genius-yes { background: #f0d879; color: #111; }   /* Yes = yellow */
+.genius-no  { background: #eee; color: #555; }      /* No = grey */
+
+.confidence-bar {
+  height: 16px;
+  background: #f7f4ec;
+  border-radius: 12px;
+  overflow: hidden;
+  margin: 6px 0 12px 0;
+}
+
+.confidence-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #f0d879, #f7e6a0);
+  width: 0;
+  transition: width 1s ease-out;
+  border-radius: 12px;
+}
+
+.contributors {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+.contributor-box {
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 0.9em;
+  font-weight: bold;
+}
+
+.contributor-positive { background: #fff9e6; color: #111; border: 1px solid #f0d879; }
+.contributor-negative { background: #ffe6e6; color: #222; border: 1px solid #f0b0b0; }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- Top Links Section -->
+  <div class="top-links">
+  <h2>Genius Music Detector: Analysis Output Rendering Tool</h2>
+
+  <div class="resource-links">
+    Analysis Examples:
+    <a href="like_me.html" target="_blank">Like Me (Pop)</a>
+    <a href="good-vibe.html" target="_blank">Good Vibe (Rap)</a>
+    <a href="reafs.html" target="_blank">Reafs (Experimental)</a>
+    <a href="fell.html" target="_blank">Fell (Default)</a>
+    <a href="https://github.com/rayofgoldenlight/rayofgoldenlight.github.io/tree/main/projects/geniusMusicRater/cprogram/build" target="_blank">Download Genius Music Detector</a>
+  </div>
+
+  <button class="collapsible">How to Use Genius Music Detector</button>
+  <div class="content">
+    <p>
+      The Genius Music Detector lets you analyze MP3 files and generate JSON output for
+      visualization. Getting started is straightforward:
+    </p>
+    
+    <p>
+      First, make sure your <code>.mp3</code> file is in the same folder as
+      <code>mp3_analyzer.exe</code>. Once your file is ready, open a terminal —
+      Command Prompt on Windows or Terminal on Linux.
+    </p>
+    
+    <p>
+      Run the analyzer using the following command:
+    </p>
+
+    <pre style="background:#f7f4ec; padding:10px; border-radius:6px;">
+Usage: mp3_analyzer.exe <input.mp3> [genre] [--m(elody)] [--s(tructure)] [--g(enius)]
+Genres: rap, vgm, pop, experimental, phonk, default
+Flags:  --m // --melody     enable melody feature extraction
+       --s // --structure  enable structure feature extraction
+       --g // --genius  enable genius rating
+
+Windows Examples (Command Prompt):
+mp3_analyzer.exe like_me.mp3 --m --s --g
+mp3_analyzer.exe reafs.mp3 experimental
+
+Linux Examples (Terminal):
+./mp3_analyzer.exe like_me.mp3 --m --s --g
+./mp3_analyzer.exe reafs.mp3 experimental
+
+Note: The HTML song analysis rendering website only supports JSON pasted if all flags are enabled 
+      (write --m --s --g after your mp3 file if you want to use this site)
+
+Calibration: Set expected “typical good songs” to land ~60–70%, “mediocre” to ~40–50%, “genius” ≥85% 
+Right now, most average tracks get 40–55%
+    </pre>
+    <p>
+      The analyzer supports several options:
+      <br><b>--m / --melody</b>: enables melody extraction<br>
+      <b>--s / --structure</b>: extracts musical structure<br>
+      <b>--g / --genius</b>: provides a Genius Rating
+    </p>
+
+    <p>
+      You can also specify an optional genre: <b>rap, vgm, pop, experimental, phonk, or default</b>.
+    </p>
+
+    <p>
+      After execution, copy the JSON output (from the first <code>{</code> to the last <code>}</code>, do NOT include the Profile and Elasped Time sections) and paste it into this page to visualize your analysis.
+    </p>
+
+    Note (for a 7-minute song): No parameters should run under 10 seconds. All parameters should run under 90 seconds.
+
+    <p><em>Enjoy exploring what's hidden in your music.</em></p>
+    <p><em>And for creators, hope you are able to make a song that truly is, Genius</em></p>
+  </div>
+</div>
+
+  <h1>Song Analysis: <span id="fileName"></span></h1>
+
+  <div id="inputArea">
+    <p>Paste your JSON song analysis here:</p>
+    <textarea id="jsonInput" placeholder='{"file":"mysong.mp3", ...}'></textarea><br>
+    <button id="renderBtn">Render Analysis</button>
+  </div>
+
+  <!-- Sections -->
+  <div class="section" id="geniusScore"><h2>Genius Score</h2><div id="geniusContent"></div></div>
+  <div class="section" id="basicStats"><h2>Basic Stats</h2><div id="basicStatsContent"></div></div>
+  <div class="section" id="features"><h2>Features</h2><div id="featuresContent"></div></div>
+  <div class="section" id="rhythm"><h2>Rhythm</h2><div id="rhythmContent"></div></div>
+  <div class="section" id="harmony"><h2>Harmony</h2><div id="harmonyContent"></div></div>
+  <div class="section" id="melody"><h2>Melody</h2><div id="melodyContent"></div></div>
+  <div class="section" id="structure"><h2>Structure</h2><div id="structureContent"></div></div>
+  <div class="section" id="production"><h2>Production</h2><div id="productionContent"></div></div>
+  <div class="section" id="psychoacoustics"><h2>Psychoacoustics</h2><div id="psychoContent"></div></div>
+</div>
+
+<script>
+function renderTable(obj) {
+  let html = "<table>";
+  for (let key in obj) {
+    let val = obj[key];
+    if (Array.isArray(val) && val.length > 0 && typeof val[0] === "object") val = val.map(v => JSON.stringify(v)).join("<br>");
+    else if (typeof val === "object" && val !== null) val = JSON.stringify(val);
+    html += `<tr><th>${key}</th><td>${val}</td></tr>`;
+  }
+  html += "</table>";
+  return html;
+}
+
+function renderAnalysis(data) {
+  document.getElementById("fileName").innerText = data.file || "Unknown";
+
+  // Genius
+  // Genius
+let geniusHtml = `
+  <p>Overall Score: <span class="score">${data.genius.overall_score}%</span></p>
+  <div class="bar"><div class="bar-fill" style="width:${data.genius.overall_score}%"></div></div>
+  
+  <p>
+    <span class="genius-status ${data.genius.is_genius ? 'genius-yes' : 'genius-no'}">
+      ${data.genius.is_genius ? 'Genius' : 'Not Genius'}
+    </span>
+  </p>
+  
+  <p>Confidence: <span class="score">${(data.genius.confidence*100).toFixed(2)}%</span></p>
+  <div class="confidence-bar">
+    <div class="confidence-fill" style="width:${data.genius.confidence*100}%"></div>
+  </div>
+
+  <h4>Category Scores</h4>
+  <table>
+`;
+
+for (let cat in data.genius.categories) {
+  if (cat === "explanation") continue;
+  geniusHtml += `<tr>
+    <th>${cat}</th>
+    <td>
+      <div class="bar"><div class="bar-fill" style="width:${data.genius.categories[cat]}%"></div></div>
+      ${data.genius.categories[cat]}%
+    </td>
+  </tr>`;
+}
+
+geniusHtml += `</table>
+  <h4>Explanation</h4>
+  <p><b>Positive Contributors:</b></p>
+  <div class="contributors">
+    ${(data.genius.categories.explanation?.positive_contributors || ["None"]).map(c => `<span class="contributor-box contributor-positive">${c}</span>`).join("")}
+  </div>
+
+  <p><b>Negative Contributors:</b></p>
+  <div class="contributors">
+    ${(data.genius.categories.explanation?.negative_contributors || ["None"]).map(c => `<span class="contributor-box contributor-negative">${c}</span>`).join("")}
+  </div>
+`;
+
+document.getElementById("geniusContent").innerHTML = geniusHtml;
+
+  document.getElementById("basicStatsContent").innerHTML = renderTable(data.basic_stats || {});
+  
+  if (data.features) {
+    const f = data.features;
+    let fHtml = `<table>
+      <tr><th>Tempo (BPM)</th><td>${f.tempo_bpm}</td></tr>
+      <tr><th>Key</th><td>${f.key}</td></tr>
+      <tr><th>Spectral</th><td>
+        <table style="width:100%; margin-top:8px;">
+          <tr><th>Centroid</th><td>${f.spectral.centroid.toFixed(2)}</td></tr>
+          <tr><th>Rolloff</th><td>${f.spectral.rolloff.toFixed(2)}</td></tr>
+          <tr><th>Brightness</th><td>${f.spectral.brightness.toFixed(4)}</td></tr>
+          <tr><th>MFCC</th><td>
+            <div style="display:grid; grid-template-columns: repeat(auto-fill,minmax(60px,1fr)); gap:6px;">
+              ${f.spectral.mfcc.map((val,i)=>`<div style="background:${val>=0?'#fff9e6':'#ffe6e6'};border:1px solid #ddd;border-radius:4px;padding:6px;text-align:center;">C${i+1}<br><b>${val.toFixed(2)}</b></div>`).join("")}
+            </div>
+          </td></tr>
+        </table>
+      </td></tr>
+    </table>`;
+    document.getElementById("featuresContent").innerHTML = fHtml;
+  }
+
+  document.getElementById("rhythmContent").innerHTML = renderTable(data.rhythm || {});
+
+  // Harmony section
+  const harmony = data.harmony;
+  let harmonyHtml = "<table>";
+  harmonyHtml += `<tr><th>Global Key</th><td>${harmony.global_key}</td></tr>`;
+  harmonyHtml += `<tr><th>Key Stability</th><td>${harmony.key_stability}</td></tr>`;
+  harmonyHtml += `<tr><th>Modulation Count</th><td>${harmony.modulation_count}</td></tr>`;
+  harmonyHtml += `<tr><th>Harmonic Motion</th><td>${harmony.harmonic_motion}</td></tr>`;
+  harmonyHtml += `<tr><th>Tension</th><td>${harmony.tension}</td></tr>`;
+  harmonyHtml += `<tr><th>Chord Progression</th><td><div class="timeline">`;
+  harmony.chords.forEach(ch => {
+    harmonyHtml += `<div class="chord-block"><div class="chord-name">${ch.name}</div><div class="chord-time">${ch.time_sec.toFixed(2)}s</div></div>`;
+  });
+  harmonyHtml += `</div></td></tr></table>`;
+  document.getElementById("harmonyContent").innerHTML = harmonyHtml;
+
+  document.getElementById("melodyContent").innerHTML = renderTable(data.melody || {});
+
+  // Structure
+  const structure = data.structure;
+  let structureHtml = "<table>";
+  structureHtml += `<tr><th>Section Count</th><td>${structure.section_count}</td></tr>`;
+  structureHtml += `<tr><th>Arc Complexity</th><td>${structure.arc_complexity}</td></tr>`;
+  structureHtml += `<tr><th>Repetition Ratio</th><td>${structure.repetition_ratio}</td></tr>`;
+  structureHtml += `<tr><th>Duration Ratio</th><td>${structure.duration_ratio}</td></tr>`;
+  structureHtml += `<tr><th>Has Chorus</th><td>${structure.has_chorus ? "Yes" : "No"}</td></tr>`;
+  structureHtml += `<tr><th>Labels Summary</th><td><table style="width:100%; margin-top:8px;">`;
+  structureHtml += `<tr><th>Label</th><th>Count</th></tr>`;
+  for (const [label,count] of Object.entries(structure.section_labels_summary)) {
+    structureHtml += `<tr><td>${label}</td><td>${count}</td></tr>`;
+  }
+  structureHtml += `</table></td></tr>`;
+  structureHtml += `<tr><th>Sections</th><td><table style="width:100%; margin-top:8px;"><tr><th>Start</th><th>End</th><th>Duration</th><th>Label</th></tr>`;
+  structure.sections.forEach(sec=>{
+    const duration = (sec.end_sec-sec.start_sec).toFixed(2);
+    structureHtml += `<tr><td>${sec.start_sec.toFixed(2)}</td><td>${sec.end_sec.toFixed(2)}</td><td>${duration}</td><td>${sec.label}</td></tr>`;
+  });
+  structureHtml += `</table></td></tr></table>`;
+  document.getElementById("structureContent").innerHTML = structureHtml;
+
+  document.getElementById("productionContent").innerHTML = renderTable(data.production || {});
+  document.getElementById("psychoContent").innerHTML = renderTable(data.psychoacoustics || {});
+}
+
+// Collapsible functionality
+document.querySelectorAll(".collapsible").forEach(btn=>{
+  btn.addEventListener("click",()=> {
+    const content = btn.nextElementSibling;
+    content.style.display = content.style.display==="block"?"none":"block";
+  });
+});
+
+document.getElementById("renderBtn").addEventListener("click",()=>{
+  try {
+    const jsonText = document.getElementById("jsonInput").value;
+    const parsed = JSON.parse(jsonText);
+    renderAnalysis(parsed);
+  } catch(e) {
+    alert("Invalid JSON: "+e.message);
+  }
+});
+</script>
+
+<footer style="text-align:center; padding:20px; margin-top:40px; border-top:1px solid #e6e2d3; font-family:Georgia, serif; color:#555; background:#fffdf8;">
+  Made by <strong>rayofgoldenlight</strong>
+</footer>
+</body>
+</html>

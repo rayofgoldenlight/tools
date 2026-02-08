@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Project: Bomuljido</title>
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+    rel="stylesheet" />
+  <style>
+    /* --- General look --- */
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      color: #0a1f33;
+      background: linear-gradient(135deg, #e8f3ff 0%, #f8fbff 50%, #e3f1ff 100%);
+      background-size: 300% 300%;
+      animation: gradientShift 20s ease infinite;
+    }
+
+    @keyframes gradientShift {
+      0%   { background-position: 0% 50%; }
+      50%  { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    .container {
+      max-width: 700px;
+      background: rgba(255, 255, 255, 0.7);
+      backdrop-filter: blur(10px);
+      border-radius: 1rem;
+      box-shadow: 0 8px 25px rgba(0, 60, 130, 0.1);
+      padding: 2rem;
+      margin-top: 2rem;
+    }
+
+    h1 {
+      font-weight: 600;
+      background: linear-gradient(90deg, #3b8eea, #0051a3);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    h4 {
+      color: #0051a3;
+      font-weight: 500;
+    }
+
+    .btn-primary {
+      background: linear-gradient(90deg, #0074e4, #48a6ff);
+      border: none;
+    }
+
+    .btn-primary:hover {
+      background: linear-gradient(90deg, #005fb3, #3391f0);
+    }
+
+    .btn-outline-secondary {
+      color: #0051a3;
+      border-color: #0051a3;
+    }
+
+    .btn-outline-secondary:hover {
+      background: #0051a3;
+      color: #fff;
+    }
+
+    .results-table th, .results-table td {
+      vertical-align: middle;
+      border-bottom: 1px solid rgba(0, 80, 180, 0.1);
+    }
+
+    .table thead th {
+      background: rgba(230, 242, 255, 0.6);
+      color: #003366;
+    }
+
+    .spinner-border {
+      width: 1rem;
+      height: 1rem;
+    }
+
+    /* --- Subtle transitions for interactive feel --- */
+    input.form-control, .btn {
+      transition: all 0.3s ease;
+    }
+
+    input.form-control:focus {
+      box-shadow: 0 0 0 0.25rem rgba(0, 132, 255, 0.25);
+      border-color: #0084ff;
+    }
+
+    .btn:active {
+      transform: scale(0.98);
+    }
+
+    /* --- Responsive adjustments --- */
+    @media (max-width: 576px) {
+      .container { padding: 1rem; margin-top: 1rem; }
+      h1 { font-size: 1.5rem; }
+      .btn { font-size: 0.9rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container shadow-lg">
+    <h1 class="mb-4 text-primary text-center">FHIR Patient Finder</h1>
+
+    <!-- Search form -->
+    <form id="searchForm" class="needs-validation mb-3" novalidate>
+      <div class="input-group has-validation">
+        <input id="searchName" 
+               type="text" 
+               class="form-control" 
+               placeholder="Enter patient name..." 
+               required />
+        <button id="searchBtn" 
+                class="btn btn-primary" 
+                type="submit">Search</button>
+        <div class="invalid-feedback">
+          Please enter a patient name.
+        </div>
+      </div>
+    </form>
+
+    <!-- Loading indicator -->
+    <div id="loadingIndicator" class="text-secondary small mb-2" style="display:none;">
+      <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+      Searching…
+    </div>
+
+    <div class="mb-3 text-end">
+      <button id="favoritesBtn" class="btn btn-outline-secondary" type="button">
+        View Favorites
+      </button>
+    </div>
+
+    <!-- Results area -->
+    <div id="results" class="mt-4">
+      <h4>Results</h4>
+      <div id="resultsContainer" class="table-responsive"></div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Project: Bomuljido</title>
+  <link rel="icon" type="image/x-icon" href="https://i.postimg.cc/WpBMQmVy/gl-ll.png">
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+  <header class="text-center py-4 shadow-sm">
+    <h1 class="fw-bold gradient-text">FHIR Patient Finder</h1>
+    <p class="lead text-muted">A .NET web API that searches and manages patients following FHIR standards</p>
+     <a
+    href="https://github.com/rayofgoldenlight/rayofgoldenlight.github.io/tree/main/projects/fhirpatientsearch/fpf"
+    target="_blank"
+    class="github-link"
+    aria-label="View on GitHub"
+  >
+    <img
+      src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/github.svg"
+      alt="GitHub logo"
+      class="github-logo"
+    />
+  </a>
+  </header>
+
+  <main class="container my-5">
+    <!-- Slideshow -->
+    <div id="gifSlideshow" class="mb-5">
+      <div class="slideshow-container">
+        <img src="https://i.postimg.cc/vHKLTRV6/dnapitest.gif" class="slide active" alt="Demo 1 GIF">
+        <img src="https://i.postimg.cc/K8g7g97k/dnfavtest.gif" class="slide" alt="Demo 2 GIF">
+        <img src="https://i.postimg.cc/nLb4KvTD/dnsearchtest.gif" class="slide" alt="Demo 3 GIF">
+      </div>
+      <div class="text-center mt-3">
+        <button class="btn btn-outline-primary me-2" id="prevBtn">◀ Prev</button>
+        <button class="btn btn-outline-primary" id="nextBtn">Next ▶</button>
+      </div>
+    </div>
+
+    <!-- Project Info -->
+    <section class="info">
+      <h2 class="text-primary mb-3">What This Project Does</h2>
+      <p>
+        The <strong>FHIR Patient Finder</strong> is a .NET 6+ web application created to search, favorite,
+        and manage patient data following the <a href="https://www.hl7.org/fhir/" target="_blank">FHIR (Fast Healthcare Interoperability Resources)</a> standards.
+        It communicates with FHIR-compatible servers to perform patient lookups by name, and provides 
+        endpoints to manage favorite patients and audit interactions.
+      </p>
+
+      <h4 class="text-primary mt-4">Core Technologies Used</h4>
+      <ul>
+        <li>ASP.NET Core Minimal API</li>
+        <li>Entity Framework Core (SQL Server LocalDB)</li>
+        <li>Custom FHIR client service</li>
+        <li>Modern HTML/CSS/Bootstrap frontend</li>
+      </ul>
+
+      <h4 class="text-primary mt-4">Database Used</h4>
+      <p>
+        The backend uses an older local version of Microsoft SQL Server (LocalDB).
+        You can find info or install it from the official Microsoft link:
+        <a href="https://aka.ms/sqllocaldb" target="_blank">https://aka.ms/sqllocaldb</a>.
+      </p>
+
+      <h4 class="text-primary mt-4">Key Features</h4>
+      <ul>
+        <li>Search patients by name (via FHIR API)</li>
+        <li>Add and remove patient favorites</li>
+        <li>Track actions in an audit log</li>
+        <li>Simple RESTful API structure for easy integration</li>
+      </ul>
+
+      <h4 class="text-primary mt-4">Implementation Highlights</h4>
+      <p>
+        The project uses dependency injection for all core services:
+        <ul>
+          <li><code>IFhirPatientService</code> – handles FHIR API requests</li>
+          <li><code>IPatientRepository</code> – handles database and favorite management</li>
+          <li><code>AppDbContext</code> – Entity Framework context for audit logging and patient records</li>
+        </ul>
+      </p>
+
+      <p>
+        Each endpoint is built as a minimal API route, for simplicity and clarity. The frontend (in a separate project) uses these endpoints 
+        to perform real-time searches and favorite operations.
+      </p>
+    </section>
+    <section class="build-section mt-5">
+        <h2 class="text-primary mb-3">How to Build and Run the Project</h2>
+
+        <p>
+          For users who’d like to explore and run the FHIR Patient Finder source code themselves,
+          you can follow these simple steps below. Click to expand for details.
+        </p>
+
+        <div class="accordion" id="buildAccordion">
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="headingBuild">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseBuild" aria-expanded="false" aria-controls="collapseBuild">
+                Show Step‑by‑Step Instructions
+              </button>
+            </h2>
+            <div id="collapseBuild" class="accordion-collapse collapse" aria-labelledby="headingBuild" data-bs-parent="#buildAccordion">
+              <div class="accordion-body">
+                <ol>
+                  <li>Make sure you have the latest version of the <a href="https://dotnet.microsoft.com/en-us/download" target="_blank">.NET SDK installed</a>.</li>
+                  <li>Clone the project from GitHub:
+                    <pre><code>git clone https://github.com/rayofgoldenlight/rayofgoldenlight.github.io.git</code></pre>
+                  </li>
+                  <li>Navigate to the project folder:
+                    <pre><code>cd projects/fhirpatientsearch/fpf</code></pre>
+                  </li>
+                  <li>Build the project:
+                    <pre><code>dotnet build</code></pre>
+                  </li>
+                  <li>Run the application:
+                    <pre><code>dotnet run</code></pre>
+                  </li>
+                  <li>Open your browser and visit the shown local URL (usually <code>https://localhost:5001</code>) to access the API or web UI.</li>
+                </ol>
+                <p class="small text-muted mb-0">
+                  💡 You may need to ensure your local database connection is configured correctly. This project uses <a href="https://aka.ms/sqllocaldb" target="_blank">SQL LocalDB</a>.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    <!-- Footer -->
+    <footer class="text-center mt-5 pt-4 border-top">
+      <p class="small text-muted">
+        Made by <strong>rayofgoldenlight</strong>
+      </p>
+    </footer>
+  </main>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>

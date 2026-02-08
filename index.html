@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ray's Tools</title>
+  <link rel="icon" type="image/x-icon" href="https://i.postimg.cc/WpBMQmVy/gl-ll.png">
+  <style>
+    body {
+      font-family: "Courier New", monospace;
+      margin: 0;
+      padding: 0;
+      background: #fdfdfd;
+      color: #111;
+      display: flex;
+    }
+
+    header {
+      padding: 1rem;
+      background: #f0f0f0;
+      border-right: 1px solid #ccc;
+      width: 260px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    h1 {
+      margin: 0 0 0.5rem 0;
+      font-size: 1.2rem;
+      text-align: center;
+    }
+
+    .sidebar-description {
+      font-size: 0.9rem;
+      margin-bottom: 1rem;
+      text-align: center;
+      color: #444;
+    }
+
+    .filters {
+      margin-bottom: 1rem;
+    }
+
+    label {
+      font-size: 0.9rem;
+      display: block;
+      margin: 0.5rem 0 0.2rem;
+    }
+
+    select, input[type="text"] {
+      width: 100%;
+      padding: 0.4rem;
+      border: 1px solid #aaa;
+      border-radius: 5px;
+      background: #fff;
+      font-family: inherit;
+      font-size: 0.9rem;
+      box-sizing: border-box;
+      cursor: pointer;
+    }
+
+    .shortcuts {
+      font-size: 0.8rem;
+      margin-top: 1rem;
+      padding: 0.5rem;
+      background: #e9e9e9;
+      border-radius: 5px;
+      color: #222;
+    }
+
+    footer {
+      font-size: 0.8rem;
+      text-align: center;
+      padding: 0.5rem;
+      border-top: 1px solid #ccc;
+      margin-top: auto;
+      color: #444;
+    }
+
+    main {
+      flex-grow: 1;
+      padding: 1rem;
+    }
+
+    .projects {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1rem;
+      max-width: 1000px;
+      margin: auto;
+    }
+
+    .project {
+      background: white;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    .project img {
+      width: 100%;
+      height: 150px;
+      object-fit: cover;
+    }
+
+    .project-content {
+      padding: 1rem;
+      flex-grow: 1;
+    }
+
+    .tags {
+      margin-top: 0.5rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.3rem;
+      list-style: none;
+      padding: 0;
+    }
+
+    .tag {
+      font-size: 0.8rem;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      background: #eee;
+    }
+
+    .color-tag {
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.8rem;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <h1>Ray's Tools</h1>
+      <div class="sidebar-description">
+        <p>
+            Mission:
+            <br>To create a world where everyone can be free.
+        </p>
+      </div>
+
+      <div class="filters">
+        <label for="search-bar">Search</label>
+        <input type="text" id="search-bar" placeholder="Search projects..." oninput="applyFilters()">
+      </div>
+
+      <div class="filters">
+        <label for="language-filter">Language</label>
+        <select id="language-filter" onchange="applyFilters()">
+          <option value="all">All</option>
+          <option value="JS">JavaScript</option>
+          <option value="Python">Python</option>
+          <option value="Rust">Rust</option>
+          <option value="HTML">HTML</option>
+          <option value="C">C</option>
+        </select>
+      </div>
+
+      <div class="filters">
+        <label for="color-filter">Color</label>
+        <select id="color-filter" onchange="applyFilters()">
+          <option value="all">All</option>
+          <option value="blue">Blue</option>
+          <option value="red">Red</option>
+          <option value="green">Green</option>
+          <option value="yellow">Yellow</option>
+          <option value="purple">Purple</option>
+          <option value="orange">Orange</option>
+          <option value="pink">Pink</option>
+        </select>
+      </div>
+
+      <div class="shortcuts">
+        <p><strong>Shortcuts:</strong></p>
+        <ul>
+          <li><code>/</code> → Toggle search focus</li>
+          <li><code>L</code> → Cycle language filter</li>
+          <li><code>K</code> → Cycle color filter</li>
+        </ul>
+      </div>
+
+      <div class="sort">
+        <label for="sort">Sort</label>
+          <select id="sort">
+            <option value="newest">Newest</option>
+            <option value="oldest">Oldest</option>
+          </select>
+      </div>
+    </div>
+
+    <footer>
+      <p>Made by <strong>rayofgoldenlight</strong></p>
+      <a href="https://github.com/rayofgoldenlight/"><image src="https://i.postimg.cc/BnSbTBSZ/githublogo.png" alt="Github Logo" style="width:42px;height:42px;"></image></a>
+    </footer>
+  </header>
+
+  <main>
+    <div class="projects" id="projects-container">
+      <!-- Projects will be injected here -->
+    </div>
+  </main>
+
+  <script>
+    // Temporary images list
+    const genimg = ['https://i.postimg.cc/LsFvRSNY/l1.jpg','https://i.postimg.cc/Jhj6B0G5/l10.jpg','https://i.postimg.cc/t4KvTWCg/l11.jpg','https://i.postimg.cc/Nj9PBptV/l12.jpg','https://i.postimg.cc/ZKDDGXGp/l13.jpg','https://i.postimg.cc/hPG53K5K/l14.jpg','https://i.postimg.cc/gcs7Dx4M/l15.jpg','https://i.postimg.cc/SRSv44Q7/l16.jpg','https://i.postimg.cc/tJBmCcY0/l17.jpg','https://i.postimg.cc/xCy4B8Q1/l18.jpg','https://i.postimg.cc/rmLHhWvH/l19.jpg','https://i.postimg.cc/6pvzDqLx/l2.jpg','https://i.postimg.cc/Xv5hcxDF/l20.jpg','https://i.postimg.cc/kXZf1KSy/l3.jpg','https://i.postimg.cc/65TMfY83/l4.jpg','https://i.postimg.cc/66MHZD5g/l5.jpg','https://i.postimg.cc/WzYXPJHT/l6.jpg','https://i.postimg.cc/RhZX8TGg/l7.jpg','https://i.postimg.cc/3RBtnqjy/l8.jpg','https://i.postimg.cc/C1YvC08T/l9.jpg','https://i.postimg.cc/RCjmvBY5/b1.jpg','https://i.postimg.cc/ZYyk7Q5f/c1.jpg','https://i.postimg.cc/Dyq9FbsL/d1.jpg','https://i.postimg.cc/RVrkjT3v/d2.jpg','https://i.postimg.cc/W4SYzGbq/do1.jpg','https://i.postimg.cc/mZ7XFWDG/f1.jpg','https://i.postimg.cc/y6R5XSLt/f10.jpg','https://i.postimg.cc/fyYrw63D/f11.jpg','https://i.postimg.cc/kGPThfTZ/f2.jpg','https://i.postimg.cc/JnkTq95Z/f3.jpg','https://i.postimg.cc/tgfSFXW9/f4.jpg','https://i.postimg.cc/9fzg444x/f5.jpg','https://i.postimg.cc/8zZnPdCJ/f6.jpg','https://i.postimg.cc/bwyBhVqf/f7.jpg','https://i.postimg.cc/FsgBwX5x/f8.jpg','https://i.postimg.cc/vHdKPHjB/f9.jpg','https://i.postimg.cc/Rh1grK80/h1.jpg','https://i.postimg.cc/wvZCxX0c/hy1.jpg','https://i.postimg.cc/rpn63X4H/hy2.jpg','https://i.postimg.cc/hjXFqybt/hyd1.jpg','https://i.postimg.cc/d0tP5thd/hyd2.jpg','https://i.postimg.cc/x1PVGb1n/hyd3.jpg','https://i.postimg.cc/cLWN8cZF/hyd4.jpg','https://i.postimg.cc/tCWjTc01/hyd5.jpg','https://i.postimg.cc/RZ5DDCDh/j1.jpg','https://i.postimg.cc/dtTf6Zng/li1.jpg','https://i.postimg.cc/wMkQ4Hyy/m1.jpg','https://i.postimg.cc/63kPx9pM/m10.jpg','https://i.postimg.cc/XqWggXJ6/m2.jpg','https://i.postimg.cc/26hwvnCx/m3.jpg','https://i.postimg.cc/nL62C3fz/m4.jpg','https://i.postimg.cc/MGct6h4N/m5.jpg','https://i.postimg.cc/rwZQL8h5/m6.jpg','https://i.postimg.cc/t442f1zX/m7.jpg','https://i.postimg.cc/ZKcwVPp7/m8.jpg','https://i.postimg.cc/m2RdYpz1/m9.jpg','https://i.postimg.cc/G3Br02qx/mt1.jpg','https://i.postimg.cc/3xXc5MsB/n1.jpg','https://i.postimg.cc/vmGSGqMd/n2.jpg','https://i.postimg.cc/vTx00C75/p.jpg','https://i.postimg.cc/V5yDp44p/p1.jpg','https://i.postimg.cc/hj5CbKmS/p34.jpg','https://i.postimg.cc/LXXC1JnC/p5.jpg','https://i.postimg.cc/85JYYFNF/t1.jpg','https://i.postimg.cc/3wb69j55/t2.jpg','https://i.postimg.cc/hGG69yY1/t3.jpg','https://i.postimg.cc/7Z9jJ8KL/t4.jpg','https://i.postimg.cc/wjgSBTcP/t5.jpg','https://i.postimg.cc/HnMfrrNG/v1.jpg']
+
+    // Function to pick a random generic image
+    function gri(){
+      const idx = Math.floor(Math.random() * genimg.length);
+      return genimg[idx];
+    }
+    
+    const PROJECTS = [
+      /*{id:'p-00001',name:'Todo App',desc:'A simple todo list app built with vanilla JavaScript.',url:'#',tags:['JavaScript','HTML','CSS'],color:'blue', image:gri()},
+      {id:'p-00002',name:'Data Analyzer',desc:'A Python script that processes and visualizes CSV data.',url:'#',tags:['Python'],color:'red', image:gri()},
+      {id:'p-00003',name:'Rust Optimizer',desc:'A Rust tool that optimizes CSV files for faster queries.',url:'#',tags:['Rust'],color:'green', image:gri()},
+      {id:'p-00004',name:'Web Scraper',desc:'A Python script that scrapes and cleans data from websites.',url:'#',tags:['Python'],color:'yellow', image:gri()},
+      {id:'p-00005',name:'Portfolio Site',desc:'A personal website for showcasing projects with filters.',url:'#',tags:['JavaScript','HTML','CSS'],color:'purple', image:gri()},
+      {id:'p-00006',name:'File Sync',desc:'A Rust application that syncs files between devices.',url:'#',tags:['Rust'],color:'orange', image:gri()},
+      {id:'p-00007',name:'Chat Widget',desc:'A small JavaScript widget for embedding live chat into sites.',url:'#',tags:['JavaScript'],color:'pink', image:gri()},
+      */{id:'p-00008',name:'Scratch Work',desc:'Scrap projects and work that are free for others to build upon',url:'scrap/scrapdirectory.html',tags:['HTML'],color:'orange', image:'https://i.postimg.cc/j5pWLdsG/thesun.png'},
+      {id:'p-00009',name:'Graph Editor',desc:'A TypeScript graph editor that you can play with',url:'projects/grapheditor/index.html',tags:['HTML','TS'],color:'blue', image:'https://i.postimg.cc/dV59zTFs/beach.jpg'},
+      {id:'p-00010',name:'Thought Chainer',desc:'A JavaScript site to help spread complex chains of thought',url:'projects/chainthought/index.html',tags:['HTML','JS'],color:'purple', image:'https://i.postimg.cc/yxws7xXG/iceberg.jpg'},
+      {id:'p-00011',name:'Electronic Primer',desc:'A simple site to explain electronic topics',url:'projects/lowlevelexplained/index.html',tags:['HTML'],color:'green', image:'https://i.postimg.cc/FRhHnM62/electronic.jpg'},
+      {id:'p-00012',name:'Genius Music Detector',desc:'A program written in C to determine if a song is [Genius] or not. Has a downloadable executable.',url:'projects/geniusMusicRater/index.html',tags:['C'],color:'yellow', image:'https://i.postimg.cc/0jHHn2Wd/musicrated.jpg'},
+      {id:'p-00013',name:'FHIR Patient Finder',desc:'A .NET program that finds and bookmarks patient data (that is under FHIR standards)',url:'projects/fhirpatientsearch/fpi/index.html',tags:['C#'],color:'blue', image:'https://i.postimg.cc/YSSJBGJ9/treasuremap.jpg'},
+      {id:'p-00014',name:'Non-Redirecting Link Parser',desc:'A Python/C program that returns non-redirecting links',url:'projects/gfind/gfi/index.html',tags:['C', 'Python'],color:'red', image:'https://i.postimg.cc/wxkk8qdF/bsrs.jpg'},
+      {id:'p-00015',name:'Smart Copay Form Autofiller',desc:'A .NET executable that helps fill forms based FHIR patient data',url:'projects/coral/coral.html',tags:['C#', 'Python'], color:'blue', image:'https://i.postimg.cc/c6yW8ypm/coral-9.webp'},
+      {id:'p-00016',name:'Windows Infrared Camera Accessor',desc:'A C executable that helps a Windows user to find and use their infrared camera', url:'projects/irc/irc.html',tags:['C'], color:'red', image:'https://i.postimg.cc/ryhBpPvY/ichor.jpg'},
+      {id:'p-00017',name:'Encrypted Group-Task Manager',desc:'A Lua executable to manage group tasks for projects privately and easily', url:'projects/railroad/index.html',tags:['Lua'], color:'pink', image:'https://i.postimg.cc/x1Hx3MJW/rail.jpg '}
+    ];
+
+    function renderProjects() {
+      const container = document.getElementById('projects-container');
+      container.innerHTML = '';
+
+      // Make a copy of PROJECTS
+      let sortedProjects = [...PROJECTS];
+
+      // Get sort setting
+      const sortSelect = document.getElementById("sort")?.value || "newest";
+
+      // Apply sorting
+      sortedProjects.sort((a, b) => {
+        if (sortSelect === "newest") {
+          return b.id.localeCompare(a.id); // Newest first
+        } else {
+          return a.id.localeCompare(b.id); // Oldest first
+        }
+      });
+
+      // Render projects
+      sortedProjects.forEach(p => {
+        const project = document.createElement('div');
+        project.className = 'project';
+        project.setAttribute('data-tags', p.tags.join(' ') + ' ' + p.color);
+
+        project.innerHTML = `
+          <img src="${p.image}" alt="${p.name}">
+          <div class="project-content">
+            <h3><a href="${p.url}" target="_blank">${p.name}</a></h3>
+            <p>${p.desc}</p>
+            <ul class="tags">
+              ${p.tags.map(tag => `<li class="tag">${tag}</li>`).join('')}
+              <li class="color-tag" style="background:${p.color};">
+                ${p.color.charAt(0).toUpperCase()+p.color.slice(1)}
+              </li>
+            </ul>
+          </div>
+        `;
+
+        container.appendChild(project);
+      });
+    }
+
+    function applyFilters() {
+      const language = document.getElementById('language-filter').value;
+      const color = document.getElementById('color-filter').value;
+      const search = document.getElementById('search-bar').value.toLowerCase();
+      const projects = document.querySelectorAll('.project');
+
+      projects.forEach(project => {
+        const tags = project.getAttribute('data-tags');
+        const text = project.innerText.toLowerCase();
+        const matchesLanguage = language === 'all' || tags.includes(language);
+        const matchesColor = color === 'all' || tags.includes(color);
+        const matchesSearch = text.includes(search);
+        if (matchesLanguage && matchesColor && matchesSearch) {
+          project.style.display = 'flex';
+        } else {
+          project.style.display = 'none';
+        }
+      });
+    }
+
+    // Keyboard shortcuts
+    let searchFocused = false;
+
+    document.addEventListener('keydown', (e) => {
+      const searchBar = document.getElementById('search-bar');
+      if (e.key === '/') {
+        e.preventDefault();
+        if (searchFocused) {
+          searchBar.blur();
+          searchFocused = false;
+        } else {
+          searchBar.focus();
+          searchFocused = true;
+        }
+      } else if (!searchFocused && e.key === 'l') {
+        e.preventDefault();
+        cycleSelect('language-filter');
+      } else if (!searchFocused && e.key === 'k') {
+        e.preventDefault();
+        cycleSelect('color-filter');
+      }
+    });
+
+    document.getElementById('search-bar').addEventListener('blur', () => {
+      searchFocused = false;
+    });
+
+    document.getElementById('search-bar').addEventListener('focus', () => {
+      searchFocused = true;
+    });
+
+    function cycleSelect(id) {
+      const select = document.getElementById(id);
+      let i = select.selectedIndex;
+      i = (i + 1) % select.options.length;
+      select.selectedIndex = i;
+      applyFilters();
+    }
+
+    document.getElementById("sort").addEventListener("change", renderProjects);
+    
+    
+    document.addEventListener("DOMContentLoaded", () => {
+      document.getElementById("sort").value = "newest";
+      renderProjects();
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,191 @@
+/* ----- Global Appearance ----- */
+body {
+    background-color: #0a0a0a;
+    color: #e0e0e0;
+    font-family: 'Courier New', monospace;
+    margin: 0;
+    padding: 2em;
+}
+
+/* ----- Main Container ----- */
+.terminal {
+    max-width: 900px;
+    margin: auto;
+    border: 1px solid #660000;
+    padding: 2em;
+    box-shadow:
+        0 0 20px rgba(255, 0, 0, 0.4),
+        0 0 80px rgba(255, 0, 0, 0.1) inset;
+    border-radius: 10px;
+    background: radial-gradient(circle at top left, #141414, #050505 70%);
+}
+
+/* ----- Headers ----- */
+h1, h2 {
+    color: #ff3b3b;
+    text-shadow:
+        0 0 5px #a00,
+        0 0 10px #f00,
+        0 0 20px #700;
+}
+
+h1 {
+    border-bottom: 1px solid #500;
+    padding-bottom: 0.3em;
+}
+
+/* ----- Text Elements ----- */
+p, pre, code {
+    line-height: 1.6em;
+}
+
+code {
+    color: #ff5555;
+    background-color: rgba(255, 255, 255, 0.07);
+    padding: 0.15em 0.35em;
+    border-radius: 4px;
+}
+
+/* ----- Highlights and Links ----- */
+.highlight {
+    color: #ff6666;
+    text-shadow:
+        0 0 3px #f33,
+        0 0 7px #900;
+}
+
+.red {
+    color: #ff4444;
+}
+
+.link {
+    color: #ff7373;
+    text-decoration: none;
+    font-weight: bold;
+}
+.link:hover {
+    color: #ffdede;
+    text-shadow: 0 0 6px #f33;
+    text-decoration: underline;
+}
+
+/* ----- Info Sections ----- */
+.info-box {
+    background-color: rgba(255, 255, 255, 0.07);
+    border: 1px solid rgba(255, 0, 0, 0.2);
+    border-radius: 10px;
+    padding: 1em 1.5em;
+    margin: 1.2em 0;
+    box-shadow: 0 0 8px rgba(255, 0, 0, 0.15);
+}
+
+.code-block, .usage {
+    background-color: #151515;
+    color: #ff7878;
+    padding: 1em;
+    border-left: 4px solid #c00;
+    border-radius: 5px;
+    overflow-x: auto;
+    box-shadow: inset 0 0 10px rgba(255, 0, 0, 0.2);
+}
+
+/* ----- Buttons ----- */
+button {
+    background: linear-gradient(180deg, #ff4444 0%, #a60000 100%);
+    color: #000;
+    border: none;
+    padding: 0.7em 1.5em;
+    cursor: pointer;
+    margin-top: 1em;
+    font-weight: bold;
+    border-radius: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: all 0.2s ease-in-out;
+    box-shadow:
+        0 0 6px #f33,
+        inset 0 0 8px rgba(255, 0, 0, 0.2);
+}
+
+button:hover {
+    background: linear-gradient(180deg, #ff6666 0%, #c00 100%);
+    box-shadow:
+        0 0 15px #ff3333,
+        inset 0 0 10px rgba(255, 255, 255, 0.15);
+    transform: translateY(-1px);
+}
+
+/* ----- Usage Dropdown ----- */
+.usage-dropdown summary {
+    cursor: pointer;
+    font-weight: bold;
+    color: #ff4444;
+    padding: 0.3em 0;
+    transition: color 0.2s ease;
+}
+.usage-dropdown summary:hover {
+    color: #fff;
+    text-shadow: 0 0 5px #f33;
+}
+.usage-dropdown[open] summary {
+    color: #ff7777;
+}
+
+/* ----- Terminal Output Box ----- */
+.terminal-output {
+    margin-top: 1em;
+    background-color: #000;
+    border: 1px solid #c00;
+    height: 280px;
+    padding: 10px;
+    overflow-y: auto;
+    color: #ff5555;
+    font-family: 'Courier New', monospace;
+    font-size: 0.95em;
+    box-shadow: inset 0 0 20px rgba(255, 0, 0, 0.25);
+    animation: flicker 1.5s infinite alternate;
+}
+
+@keyframes flicker {
+    0%   { opacity: 0.96; text-shadow: 0 0 2px #a00; }
+    100% { opacity: 1; text-shadow: 0 0 6px #f00; }
+}
+
+/* ----- Footer ----- */
+footer {
+    text-align: center;
+    margin-top: 2.5em;
+    font-size: 0.9em;
+    color: #f77;
+    opacity: 0.85;
+}
+footer:hover {
+    opacity: 1;
+}
+
+/* ----- GitHub Link ----- */
+.github-link {
+    text-align: center;
+    margin-top: 1.5em;
+}
+
+.github-link a {
+    display: inline-block;
+    color: #ff4444;
+    text-decoration: none;
+    transition: all 0.3s ease-in-out;
+}
+
+.github-icon {
+    width: 36px;
+    height: 36px;
+    fill: currentColor;
+    filter: drop-shadow(0 0 6px #f00);
+    transition: transform 0.3s ease, filter 0.3s ease;
+}
+
+.github-link a:hover .github-icon {
+    color: #fff;
+    filter: drop-shadow(0 0 10px #ff3333);
+    transform: scale(1.15) rotate(5deg);
+}

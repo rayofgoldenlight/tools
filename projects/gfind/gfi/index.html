@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project: Nil Ahasa Ratu Taru</title>
+    <link rel="icon" type="image/x-icon" href="https://i.postimg.cc/WpBMQmVy/gl-ll.png">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="terminal">
+        <h1>gfind.exe -- Find Non‑Redirecting Public Links</h1>
+
+        <details class="usage-dropdown">
+            <summary>Show Usage Information</summary>
+            <div class="info-box">
+                <p><strong>Usage:</strong> <span class="red">gfind.exe</span> &lt;start&gt; &lt;end&gt; [--delay N] [--block N] [--title]</p>
+                <pre class="desc">
+--delay # or --d #: delays each link test to ensure whether it redirects or not
+--block # or --b #: processes links in blocks of N links, 50 is a good number to prevent errors
+--title   or --t  : displays the title of the site alongside the url
+
+Purpose: To find public working sites easier on the internet
+                </pre>
+            </div>
+        </details>
+
+        <h2>> About gfind</h2>
+        <div class="info-box">
+            <p>
+                Written in <span class="highlight">C</span> using <code>libcurl</code>, 
+                <span class="highlight">gfind</span> checks ranges of sites for non‑redirecting, public‑facing pages.
+                It performs concurrent link testing, extracts site titles, and can filter out “404”, error pages, etc.
+                <br><br>
+                The C version provides much greater speed and efficiency compared to the Python version via using concurrent functions. 
+            </p>
+        </div>
+
+        <h2>> Python Equivalent</h2>
+        <div class="info-box">
+            <p>
+                A slower, educational <span class="highlight">Python</span> variant exists:
+                <a href="https://github.com/rayofgoldenlight/rayofgoldenlight.github.io/tree/main/projects/gfind/gfind.py" target="_blank" class="link">
+                    View gfind.py on GitHub
+                </a>
+            </p>
+            <p>
+                It demonstrates the same logic using <code>requests</code> but lacks multithreading
+                and thus runs more slowly than the C program.
+            </p>
+        </div>
+
+        <h2>> JSON Formatter — gfind_fmtr.exe</h2>
+        <div class="info-box">
+            <p>
+                After running <code>gfind</code> and saving your output, you can convert results to JSON using:
+            </p>
+            <pre class="usage">./gfind_fmtr</pre>
+            <p>
+                Ensure there is an <code>input.txt</code> file in the same directory — this should be a copy‑paste 
+                of the raw console output from <code>gfind</code> using your chosen parameters.
+                The formatter will read this and produce <code>output.json</code> in the format:
+            </p>
+            <pre class="code-block">
+{
+  "data": [
+    { "title": "Example Site", "url": "https://sites.google.com/view/100" },
+    ...
+  ]
+}
+            </pre>
+            <p>
+                The json can then be entered into <code>ffdataformater.html</code> by pasting the <code>output.json</code> contents into <code>const jsonData = [output.json contents];</code>. Ctrl-f "const jsonData" on <code>ffdataformater.html</code> and you'll find it.
+                <a href="..\ffdataformater.html" target="_blank" class="link">
+                    An example ffdataformater.html (using output from ./gfind 0 500 --b 50 --t)
+                </a>
+            </p>
+        </div>
+
+        <button id="toggleBtn">▶ Simulate gfind.exe Run</button>
+        <div id="terminalOutput" class="terminal-output"></div>
+
+        <footer>
+            <p>Created by <strong>rayofgoldenlight</strong></p>
+        </footer>
+    </div><div class="github-link">
+    <a href="https://github.com/rayofgoldenlight/rayofgoldenlight.github.io/tree/main/projects/gfind"
+        target="_blank" title="View gfind on GitHub">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="github-icon">
+                <path
+                    d="M12 .5C5.73.5.5 5.74.5 12.02c0 5.1 3.29 9.42 7.85 10.94.57.11.78-.25.78-.55 
+                    0-.27-.01-1.17-.02-2.13-3.19.7-3.87-1.37-3.87-1.37-.52-1.32-1.26-1.67-1.26-1.67-1.03-.7.08-.69.08-.69 
+                    1.14.08 1.74 1.18 1.74 1.18 1.01 1.73 2.65 1.23 3.3.94.1-.74.4-1.24.72-1.53-2.55-.29-5.23-1.28-5.23-5.68 
+                    0-1.26.45-2.28 1.18-3.09-.12-.29-.51-1.46.11-3.04 0 0 .96-.31 3.15 1.18a10.98 10.98 0 0 1 5.74 0c2.19-1.49 
+                    3.15-1.18 3.15-1.18.62 1.58.23 2.75.11 3.04.73.81 1.18 1.83 1.18 3.09 0 4.41-2.68 5.38-5.24 
+                    5.67.41.35.77 1.04.77 2.1 0 1.52-.01 2.75-.01 3.13 0 .3.2.66.79.55A10.53 
+                    10.53 0 0 0 23.5 12C23.5 5.74 18.27.5 12 .5Z"
+                    fill="currentColor"/>
+            </svg>
+        </a>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

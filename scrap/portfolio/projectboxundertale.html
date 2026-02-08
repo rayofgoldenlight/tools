@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>PROJECT BOX</title>
+  <style>
+    :root{
+      --bg:#000;
+      --fg:#fff;
+      --accent:#ff3131;
+      --soft:#f5f5f5;
+      --muted:#9e9e9e;
+      --box:1.5px solid var(--fg);
+      --shadow:0 0 0px #fff, 0 0 10px rgba(255,255,255,.06);
+    }
+    html,body{height:100%;}
+    body{
+      margin:0; background:var(--bg); color:var(--fg);
+      font-family: "Press Start 2P", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      letter-spacing: .5px;
+      image-rendering: pixelated;
+      text-rendering: optimizeSpeed;
+    }
+
+    body:before{
+      content:""; position:fixed; inset:0; pointer-events:none;
+      background:
+        repeating-linear-gradient(
+          to bottom,
+          rgba(255,255,255,.02),
+          rgba(255,255,255,.02) 2px,
+          rgba(0,0,0,0) 2px,
+          rgba(0,0,0,0) 4px
+        );
+      mix-blend-mode: soft-light;
+    }
+
+    .wrap{max-width:1200px; margin:0 auto; padding:24px;}
+
+    .dialog-box{
+      border:var(--box); box-shadow:var(--shadow); padding:18px; position:relative;
+    }
+    .title{font-size:22px; line-height:1.2;}
+    .subtitle{font-size:12px; color:var(--soft); opacity:.95; min-height:1.2em}
+    .blink{animation: blink 1.2s steps(1,end) infinite;}
+    @keyframes blink{50%{opacity:0;}}
+
+    .controls{display:grid; grid-template-columns:1fr 160px 160px; gap:12px; margin:18px 0 10px;}
+    .input, .select{
+      background:var(--bg); color:var(--fg); border:var(--box); padding:12px; outline:none;
+      box-shadow:var(--shadow);
+      font-size:12px; text-transform:uppercase;
+      font-family: "Press Start 2P", monospace;
+    }
+    .input::placeholder{color:var(--muted);}    
+    .select option{background:var(--bg); color:var(--fg);} 
+
+    .grid{
+      display:grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap:14px; margin-top:12px;
+    }
+    .card{
+      border:var(--box); padding:14px; box-shadow:var(--shadow); position:relative; min-height:160px;
+      display:flex; flex-direction:column; gap:10px; isolation:isolate;
+      transition: transform .06s ease-in-out;
+    }
+    .card:hover{ transform: translateY(-2px); }
+    .card:focus-within{outline:2px dotted var(--fg); outline-offset:4px;}
+
+    .name{font-size:14px;}
+    .desc{font-size:11px; color:var(--soft); line-height:1.5;}
+    .meta{font-size:10px; color:var(--muted);}  
+
+    .tags{display:flex; flex-wrap:wrap; gap:6px;}
+    .tag{border:1px solid var(--soft); padding:4px 6px; font-size:10px;}
+
+    .actions{margin-top:auto; display:flex; gap:8px;}
+    .btn{
+      border:var(--box); background:transparent; color:var(--fg); padding:10px 10px; cursor:pointer;
+      font-size:11px; text-transform:uppercase; letter-spacing:1px; box-shadow:var(--shadow);
+      font-family: "Press Start 2P", monospace;
+    }
+    .btn:hover{filter:brightness(1.1);} 
+    .btn.primary{ border-color: var(--accent); box-shadow: 0 0 0 var(--accent), 0 0 10px rgba(255,49,49,.18);} 
+
+    .battle-menu{
+      position:sticky; bottom:0; background:rgba(0,0,0,.8); backdrop-filter: blur(2px);
+      border-top:var(--box); margin-top:18px; 
+    }
+    .battle-menu .inner{display:flex; gap:10px; padding:12px; justify-content:center; flex-wrap:wrap;}
+    .menu-btn{
+      border:var(--box); padding:12px 18px; font-size:12px; background:transparent; color:var(--fg); cursor:pointer;
+      font-family: "Press Start 2P", monospace;
+    }
+    .menu-btn:focus{outline:2px dotted var(--fg); outline-offset:4px;}
+
+    .heart{position:absolute; width:14px; height:14px; z-index:2; transform: translate(-50%, -50%);} 
+
+    .hint{font-size:10px; color:var(--muted); margin-top:8px;}
+    .hint .arrow{font-size:14px;}
+
+    .stars{position:fixed; inset:0; pointer-events:none; z-index:-1;}
+    .star{position:absolute; width:2px; height:2px; background:var(--soft); opacity:.7;}
+
+    @media (max-width:720px){
+      .controls{grid-template-columns:1fr;}
+    }
+  </style>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+</head>
+<body>
+  <svg class="heart" id="heart" viewBox="0 0 16 16" aria-hidden="true">
+    <path fill="var(--accent)" d="M4 3c-1.657 0-3 1.343-3 3 0 4 7 8 7 8s7-4 7-8c0-1.657-1.343-3-3-3-1.276 0-2.37.8-2.79 2-.42-1.2-1.514-2-2.79-2Z"/>
+  </svg>
+
+  <div class="stars" id="stars"></div>
+
+  <div class="wrap">
+    <div class="dialog-box">
+      <div class="title">PROJECT BOX</div>
+      <div class="subtitle" id="subtitle"></div>
+      <div class="controls">
+        <input id="search" class="input" placeholder="Search projects..." />
+        <select id="tagFilter" class="select">
+          <option value="" disabled selected>Filter by tags</option>
+          <option value="">All Tags</option>
+        </select>
+        <select id="sort" class="select">
+          <option value="" disabled selected>Sort by</option>
+          <option value="name-asc">Name ↑</option>
+          <option value="name-desc">Name ↓</option>
+          <option value="date-desc">Newest</option>
+          <option value="date-asc">Oldest</option>
+        </select>
+      </div>
+
+      <div class="grid" id="grid" role="list"></div>
+      <div class="hint"><span class="arrow">↑</span>/<span class="arrow">↓</span>/<span class="arrow"><</span>/<span class="arrow">></span> navigate • Enter open • F toggle ★ • / to search</div>
+    </div>
+
+    <div class="battle-menu">
+      <div class="inner">
+        <button class="menu-btn" id="openBtn">FIGHT (OPEN)</button>
+        <button class="menu-btn" id="infoBtn">ACT (INFO)</button>
+        <button class="menu-btn" id="tagBtn">ITEM (TAGS)</button>
+        <button class="menu-btn" id="backBtn">MERCY (CLEAR)</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Define a list of generic images
+    const genimg = ['https://i.postimg.cc/LsFvRSNY/l1.jpg','https://i.postimg.cc/Jhj6B0G5/l10.jpg','https://i.postimg.cc/t4KvTWCg/l11.jpg','https://i.postimg.cc/Nj9PBptV/l12.jpg','https://i.postimg.cc/ZKDDGXGp/l13.jpg','https://i.postimg.cc/hPG53K5K/l14.jpg','https://i.postimg.cc/gcs7Dx4M/l15.jpg','https://i.postimg.cc/SRSv44Q7/l16.jpg','https://i.postimg.cc/tJBmCcY0/l17.jpg','https://i.postimg.cc/xCy4B8Q1/l18.jpg','https://i.postimg.cc/rmLHhWvH/l19.jpg','https://i.postimg.cc/6pvzDqLx/l2.jpg','https://i.postimg.cc/Xv5hcxDF/l20.jpg','https://i.postimg.cc/kXZf1KSy/l3.jpg','https://i.postimg.cc/65TMfY83/l4.jpg','https://i.postimg.cc/66MHZD5g/l5.jpg','https://i.postimg.cc/WzYXPJHT/l6.jpg','https://i.postimg.cc/RhZX8TGg/l7.jpg','https://i.postimg.cc/3RBtnqjy/l8.jpg','https://i.postimg.cc/C1YvC08T/l9.jpg','https://i.postimg.cc/RCjmvBY5/b1.jpg','https://i.postimg.cc/ZYyk7Q5f/c1.jpg','https://i.postimg.cc/Dyq9FbsL/d1.jpg','https://i.postimg.cc/RVrkjT3v/d2.jpg','https://i.postimg.cc/W4SYzGbq/do1.jpg','https://i.postimg.cc/mZ7XFWDG/f1.jpg','https://i.postimg.cc/y6R5XSLt/f10.jpg','https://i.postimg.cc/fyYrw63D/f11.jpg','https://i.postimg.cc/kGPThfTZ/f2.jpg','https://i.postimg.cc/JnkTq95Z/f3.jpg','https://i.postimg.cc/tgfSFXW9/f4.jpg','https://i.postimg.cc/9fzg444x/f5.jpg','https://i.postimg.cc/8zZnPdCJ/f6.jpg','https://i.postimg.cc/bwyBhVqf/f7.jpg','https://i.postimg.cc/FsgBwX5x/f8.jpg','https://i.postimg.cc/vHdKPHjB/f9.jpg','https://i.postimg.cc/Rh1grK80/h1.jpg','https://i.postimg.cc/wvZCxX0c/hy1.jpg','https://i.postimg.cc/rpn63X4H/hy2.jpg','https://i.postimg.cc/hjXFqybt/hyd1.jpg','https://i.postimg.cc/d0tP5thd/hyd2.jpg','https://i.postimg.cc/x1PVGb1n/hyd3.jpg','https://i.postimg.cc/cLWN8cZF/hyd4.jpg','https://i.postimg.cc/tCWjTc01/hyd5.jpg','https://i.postimg.cc/RZ5DDCDh/j1.jpg','https://i.postimg.cc/dtTf6Zng/li1.jpg','https://i.postimg.cc/wMkQ4Hyy/m1.jpg','https://i.postimg.cc/63kPx9pM/m10.jpg','https://i.postimg.cc/XqWggXJ6/m2.jpg','https://i.postimg.cc/26hwvnCx/m3.jpg','https://i.postimg.cc/nL62C3fz/m4.jpg','https://i.postimg.cc/MGct6h4N/m5.jpg','https://i.postimg.cc/rwZQL8h5/m6.jpg','https://i.postimg.cc/t442f1zX/m7.jpg','https://i.postimg.cc/ZKcwVPp7/m8.jpg','https://i.postimg.cc/m2RdYpz1/m9.jpg','https://i.postimg.cc/G3Br02qx/mt1.jpg','https://i.postimg.cc/3xXc5MsB/n1.jpg','https://i.postimg.cc/vmGSGqMd/n2.jpg','https://i.postimg.cc/vTx00C75/p.jpg','https://i.postimg.cc/V5yDp44p/p1.jpg','https://i.postimg.cc/hj5CbKmS/p34.jpg','https://i.postimg.cc/LXXC1JnC/p5.jpg','https://i.postimg.cc/85JYYFNF/t1.jpg','https://i.postimg.cc/3wb69j55/t2.jpg','https://i.postimg.cc/hGG69yY1/t3.jpg','https://i.postimg.cc/7Z9jJ8KL/t4.jpg','https://i.postimg.cc/wjgSBTcP/t5.jpg','https://i.postimg.cc/HnMfrrNG/v1.jpg']
+
+    // Function to pick a random generic image
+    function gri(){
+      const idx = Math.floor(Math.random() * genimg.length);
+      return genimg[idx];
+    }
+
+    const PROJECTS = [
+      {id:'p-extra-001',name:'Friend',desc:'A friend to help in times of need.',url:'../../projects/fren/index.html',date:'2015-08-15',tags:['generator','toy'], images:['https://i.postimg.cc/mkd64TbW/rose.jpg','https://i.postimg.cc/DZkKhV5y/p1.png']},
+      {id:'p-extra-002',name:'Interesting Links',desc:'Links I found while researching',url:'../../projects/linksort/index.html',date:'2025-07-02',tags:['sync','list'], images:['https://i.postimg.cc/c44VbbsN/links.png','https://i.postimg.cc/j2c33HN6/links2.png']},
+      {id:'p-extra-003',name:'MIDI Pattern Lab',desc:'Generate retro loops with weighted RNG and scales.',url:'#',date:'2025-06-11',tags:['music','generator'], images:[gri(),gri()]},
+      {id:'p-extra-004',name:'Save Slot Sync',desc:'Small local-first sync app for game save files.',url:'#',date:'2025-05-01',tags:['sync','desktop'], images:[gri(),gri()]},
+      {id:'p-extra-005',name:'Save Slot Sync',desc:'Tile-based level editor for 2D games. Exports TMJ.',url:'#',date:'2025-05-01',tags:['editor','game-dev'], images:[gri(),gri()]},
+      {id:'p-extra-006',name:'Sprite Ripper',desc:'CLI to slice spritesheets into frames with JSON meta.',url:'#',date:'2025-05-01',tags:['tool','cli','images'], images:[gri(),gri()]}
+    ];
+
+    const favKey = 'project-box-favs';
+    const favorites = new Set(JSON.parse(localStorage.getItem(favKey) || '[]'));
+    let activeIndex = 0; 
+    let filtered = [...PROJECTS];
+
+    const grid = document.getElementById('grid');
+    const subtitleEl = document.getElementById('subtitle');
+    const heart = document.getElementById('heart');
+    const search = document.getElementById('search');
+    const tagFilter = document.getElementById('tagFilter');
+    const sort = document.getElementById('sort');
+
+    const allTags = Array.from(new Set(PROJECTS.flatMap(p=>p.tags))).sort();
+    for(const t of allTags){
+      const opt = document.createElement('option');
+      opt.value = t; opt.textContent = t; tagFilter.appendChild(opt);
+    }
+
+    const line = ' * You open the PROJECT BOX. A faint voice whispers: Select a project to inspect. ';
+    let i=0; function typeLoop(){ subtitleEl.textContent = line.slice(0,i) + (i%2?"_":""); i++; if(i<=line.length){ requestAnimationFrame(typeLoop);} }
+    typeLoop();
+
+    const stars = document.getElementById('stars');
+    function spawnStars(n=120){
+      const w = window.innerWidth, h=window.innerHeight;
+      for(let i=0;i<n;i++){
+        const s=document.createElement('div'); s.className='star';
+        s.style.left = Math.random()*w+"px";
+        s.style.top = Math.random()*h+"px";
+        s.style.opacity = (0.3+Math.random()*0.7).toFixed(2);
+        stars.appendChild(s);
+      }
+    }
+    spawnStars();
+
+    function bleep(freq=600, time=0.05){
+      const ctx = new (window.AudioContext||window.webkitAudioContext)();
+      const o = ctx.createOscillator(); const g = ctx.createGain();
+      o.type='square'; o.frequency.value=freq; o.connect(g); g.connect(ctx.destination);
+      g.gain.setValueAtTime(0.04, ctx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime+time);
+      o.start(); o.stop(ctx.currentTime+time);
+    }
+
+    function saveFavs(){ localStorage.setItem(favKey, JSON.stringify([...favorites])); }
+
+    function render(){
+      const q = search.value.trim().toLowerCase();
+      const tag = tagFilter.value;
+      filtered = PROJECTS.filter(p=>{
+        const matchesText = !q || (p.name+" "+p.desc+" "+p.tags.join(' ')).toLowerCase().includes(q);
+        const matchesTag = !tag || p.tags.includes(tag);
+        return matchesText && matchesTag;
+      }).sort((a,b)=>{
+        switch(sort.value){
+          case 'name-desc': return b.name.localeCompare(a.name);
+          case 'date-asc': return (new Date(a.date)) - (new Date(b.date));
+          case 'date-desc': return (new Date(b.date)) - (new Date(a.date));
+          default: return a.name.localeCompare(b.name);
+        }
+      });
+
+      activeIndex = Math.min(activeIndex, Math.max(0, filtered.length-1));
+
+      grid.innerHTML = '';
+      filtered.forEach((p, idx)=>{
+        const card = document.createElement('div'); card.className='card'; card.tabIndex=0; card.setAttribute('role','listitem'); card.dataset.id=p.id;
+        const name = document.createElement('div'); name.className='name'; name.textContent = `${favorites.has(p.id)?'★ ':''}${p.name}`;
+        const desc = document.createElement('div'); desc.className='desc'; desc.textContent = p.desc;
+        const meta = document.createElement('div'); meta.className='meta'; meta.textContent = `DATE ${p.date}  •  TAGS ${p.tags.join(', ')}`;
+        const tags = document.createElement('div'); tags.className='tags';
+        p.tags.forEach(t=>{ const span=document.createElement('span'); span.className='tag'; span.textContent=t; tags.appendChild(span); });
+        const actions = document.createElement('div'); actions.className='actions';
+        const open = document.createElement('a'); open.className='btn primary'; open.href=p.url; open.target='_blank'; open.rel='noopener noreferrer'; open.textContent='OPEN';
+        const fav = document.createElement('button'); fav.className='btn'; fav.textContent = favorites.has(p.id)?'★ FAVED':'☆ FAVE';
+        fav.addEventListener('click', (e)=>{ e.stopPropagation(); toggleFav(p.id); render(); });
+        actions.append(open, fav);
+        card.append(name, desc, meta, tags, actions);
+        card.addEventListener('mouseenter', ()=>{ setActive(idx); });
+        card.addEventListener('focus', ()=>{ setActive(idx); });
+        card.addEventListener('click', ()=>{ window.open(p.url, '_blank'); });
+        grid.appendChild(card);
+      });
+
+      positionHeart();
+    }
+
+    function toggleFav(id){
+      if(favorites.has(id)) favorites.delete(id); else favorites.add(id);
+      saveFavs(); bleep(500, .04);
+    }
+
+    function setActive(idx){ activeIndex = idx; positionHeart(); }
+
+    function positionHeart(){
+      const card = grid.children[activeIndex];
+      if(!card){ heart.style.display='none'; return; }
+      heart.style.display='block';
+      const rect = card.getBoundingClientRect();
+      const x = rect.left + 16;
+      const y = rect.top + 18;
+      heart.style.left = `${x}px`; heart.style.top = `${y}px`;
+    }
+
+    window.addEventListener('keydown', (e)=>{
+      if(e.key === '/' && document.activeElement !== search){ e.preventDefault(); search.focus(); return; }
+      const cols = getComputedStyle(grid).gridTemplateColumns.split(' ').length;
+      if(['ArrowRight','ArrowLeft','ArrowUp','ArrowDown','Enter','f','F'].includes(e.key)) e.preventDefault();
+      if(e.key==='ArrowRight') { activeIndex = Math.min(activeIndex+1, filtered.length-1); setActive(activeIndex); bleep(750,.03); }
+      if(e.key==='ArrowLeft')  { activeIndex = Math.max(activeIndex-1, 0); setActive(activeIndex); bleep(700,.03); }
+      if(e.key==='ArrowDown')  { activeIndex = Math.min(activeIndex+cols, filtered.length-1); setActive(activeIndex); bleep(650,.03); }
+      if(e.key==='ArrowUp')    { activeIndex = Math.max(activeIndex-cols, 0); setActive(activeIndex); bleep(600,.03); }
+      if(e.key==='Enter')      { const p = filtered[activeIndex]; if(p){ window.open(p.url, '_blank'); bleep(900,.06);} }
+      if(e.key==='f' || e.key==='F'){ const p = filtered[activeIndex]; if(p){ toggleFav(p.id); render(); }}
+    });
+
+    search.addEventListener('input', ()=>{ activeIndex=0; render(); });
+    tagFilter.addEventListener('change', ()=>{ activeIndex=0; render(); });
+    sort.addEventListener('change', ()=>{ activeIndex=0; render(); });
+
+    document.getElementById('openBtn').onclick = ()=>{ const p=filtered[activeIndex]; if(p) window.open(p.url,'_blank'); };
+    document.getElementById('infoBtn').onclick = ()=>{ const p=filtered[activeIndex]; 
+      if(p){ alert(`${p.name}\n\n${p.desc}\n\nTags: ${p.tags.join(', ')}\nDate: ${p.date}`); }
+    };
+    document.getElementById('tagBtn').onclick = ()=>{
+      const options = Array.from(tagFilter.options).slice(1).map(o => o.value); // skip first placeholder
+      let current = tagFilter.value;
+      let idx = options.indexOf(current);
+      
+      // If current is placeholder or not found, jump to first tag
+      if(idx === -1) idx = 0;
+      else idx = (idx + 1) % options.length; // cycle through real tags
+
+      tagFilter.value = options[idx];
+      activeIndex = 0;
+      render();
+      bleep(800,.04);
+    };
+
+
+    document.getElementById('backBtn').onclick = ()=>{ search.value=''; tagFilter.value=''; sort.value='name-asc'; render(); };
+
+    window.addEventListener('resize', positionHeart);
+
+    // Create bottom-left and bottom-right preview containers
+    const previewLeft = document.createElement('img');
+    const previewRight = document.createElement('img');
+    previewLeft.className = 'preview preview-left';
+    previewRight.className = 'preview preview-right';
+    document.body.appendChild(previewLeft);
+    document.body.appendChild(previewRight);
+
+    function updatePreviews(project){
+      if(project && project.images && project.images.length >= 2){
+        previewLeft.src = project.images[0];
+        previewRight.src = project.images[1];
+        previewLeft.style.display = 'block';
+        previewRight.style.display = 'block';
+      } else {
+        previewLeft.style.display = 'none';
+        previewRight.style.display = 'none';
+      }
+    }
+
+    // Hook into positionHeart so previews update when active project changes
+    const oldSetActive = setActive;
+    setActive = function(idx){
+      oldSetActive(idx);
+      const p = filtered[idx];
+      updatePreviews(p);
+    };
+
+    // Update previews when rendering
+    render();
+    updatePreviews(filtered[activeIndex]);
+  </script>
+  <style>
+    .preview {
+      position: fixed;
+      bottom: 10px;
+      max-width: 40vw;
+      max-height: 30vh;
+      object-fit: contain;
+      border: 1.5px solid var(--fg);
+      box-shadow: var(--shadow);
+      background: #000;
+      z-index: 10;
+      display: none;
+    }
+    .preview-left { left: 10px; }
+    .preview-right { right: 10px; }
+  </style>
+</body>
+</html>
+

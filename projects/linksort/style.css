@@ -1,0 +1,82 @@
+body {
+  font-family: 'Press Start 2P', monospace;
+  background-color: #1d1f21;
+  color: #fff;
+  text-align: center;
+  padding: 20px;
+}
+
+h1 {
+  font-size: 16px;
+  margin-bottom: 20px;
+  color: #00ffcc;
+}
+
+table {
+  width: 90%;
+  margin: auto;
+  border-collapse: collapse;
+  font-size: 10px;
+  background-color: #282c34;
+}
+
+th, td {
+  border: 2px solid #00ffcc;
+  padding: 10px;
+  text-align: left;
+}
+
+th {
+  background-color: #333;
+}
+
+a {
+  color: #ffcc00;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+img.thumbnail {
+  width: 40px;
+  height: 40px;
+  margin-left: 10px;
+  image-rendering: pixelated;
+  cursor: pointer;
+  border: 2px solid #ffcc00;
+}
+
+/* Tooltip */
+#tooltip {
+  position: absolute;
+  background: #222;
+  border: 2px solid #00ffcc;
+  padding: 10px;
+  color: #fff;
+  font-size: 8px;
+  width: 200px;
+  text-align: center;
+  z-index: 999;
+}
+
+#tooltip img {
+  width: 100%;
+  height: auto;
+  margin-bottom: 5px;
+  image-rendering: pixelated;
+}
+
+#tooltip p {
+  font-size: 12px; /* Bigger title for readability */
+  font-weight: bold;
+  color: #ffcc00;
+  margin: 5px 0 0;
+}
+
+.hidden {
+  display: none;
+}
+
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');

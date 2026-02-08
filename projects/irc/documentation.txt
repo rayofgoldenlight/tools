@@ -1,0 +1,33 @@
+purpose: allow a user to record and access the infrared camera on their windows-based device
+
+can run the program by typing it's name in command prompt
+-------------
+just type:
+camera_tool
+-------------
+or if in msys2 mingw64 window do:
+./camera_tool
+-------------
+and the program will start running
+- make sure you are in the same directory as the executable
+
+currently the program just works for certain windows-based infrared-camera-installed devices
+
+if you have a black dot (the infrared sensor) next to your camera, this program may work for you
+most likely have it if your device has facial login
+
+--------------------------------------------------
+if you want to modify:
+
+to compile the current program in msys2 mingw64:
+gcc main.c camera_select.c camera_formats.c ir_capture.c -o camera_tool.exe \
+    -lsetupapi -lcfgmgr32 \
+    -lmf -lmfplat -lmfreadwrite -lmfuuid -lole32 -luuid \
+    -luser32 -lgdi32 -lavifil32
+
+notes on what the code does:
+main.c: orchestrator
+1.) camera_select.c: find cameras avaliable
+2.) camera_formats.c: checks the format of the camera
+3.) ir_capture.c: shows camera feed and gives option to record feed to a AVI video file
+ir_capture.h: defines PreviewIRCamera

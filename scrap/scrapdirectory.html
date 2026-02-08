@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Project: Rakkhun</title>
+  <link rel="icon" type="image/x-icon" href="https://i.postimg.cc/WpBMQmVy/gl-ll.png">
+  <style>
+    :root {
+      --color-bg: #000;          /* Black background */
+      --color-text: #f5f5f5;     /* Light text */
+      --color-gold: #d4af37;     /* Gold */
+      --color-blue: #0077ff;     /* Blue */
+
+      --font-size-base: clamp(0.9rem, 1vw + 0.6rem, 1rem);
+      --font-size-md: clamp(1.1rem, 1.5vw + 0.7rem, 1.4rem);
+      --font-size-lg: clamp(1.8rem, 3vw + 0.8rem, 2.4rem);
+
+      --space-sm: 0.4rem;
+      --space-md: 0.8rem;
+      --space-lg: 1.5rem;
+
+      --radius: 0.5rem;
+    }
+
+    body {
+      margin: 0;
+      font-family: system-ui, sans-serif;
+      background: var(--color-bg);
+      color: var(--color-text);
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+      padding: var(--space-lg);
+    }
+
+    .container {
+      max-width: 800px;
+      width: 100%;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: var(--space-lg);
+      border-bottom: 1px solid var(--color-blue);
+      padding-bottom: var(--space-md);
+    }
+
+    header h1 {
+      font-size: var(--font-size-lg);
+      color: var(--color-gold);
+      margin: 0;
+    }
+
+    .breadcrumb {
+      display: flex;
+      gap: var(--space-sm);
+      font-size: var(--font-size-base);
+      color: var(--color-blue);
+    }
+
+    .breadcrumb span {
+      cursor: pointer;
+    }
+
+    .breadcrumb .sep {
+      color: var(--color-text);
+      opacity: 0.5;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: var(--space-md);
+    }
+
+    .card {
+      border: 1px solid var(--color-gold);
+      border-radius: var(--radius);
+      padding: var(--space-md);
+      text-align: left;
+      transition: background 0.2s ease;
+      cursor: pointer;
+    }
+
+    .card:hover {
+      background: rgba(212,175,55,0.1);
+    }
+
+    .card h2 {
+      margin: 0 0 var(--space-sm) 0;
+      font-size: var(--font-size-md);
+      color: var(--color-gold);
+    }
+
+    .card p {
+      margin: 0;
+      font-size: var(--font-size-base);
+      color: var(--color-blue);
+      opacity: 0.9;
+    }
+
+    .back-btn {
+      display: inline-block;
+      margin-bottom: var(--space-lg);
+      padding: 0.4rem 0.8rem;
+      font-size: var(--font-size-base);
+      border: 1px solid var(--color-blue);
+      border-radius: var(--radius);
+      color: var(--color-blue);
+      cursor: pointer;
+    }
+
+    .back-btn:hover {
+      background: rgba(0,119,255,0.1);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Scratch Work</h1>
+      <nav class="breadcrumb" id="breadcrumb"></nav>
+    </header>
+    <div id="nav"></div>
+    <div class="grid" id="projectsGrid"></div>
+  </div>
+
+  <script>
+    const PROJECTS = [
+      {id:'p-00000',relpath:'../index.html'},
+      {id:'p-00001',relpath:'portfolio/yanko_directoryfromthefuture.html'},
+      {id:'p-00002',relpath:'portfolio/projectboxundertale.html'},
+    ];
+
+    function buildTree(projects) {
+      const tree = {};
+      projects.forEach(p => {
+        const parts = p.relpath.split('/');
+        let current = tree;
+        parts.forEach((part, i) => {
+          if (i === parts.length - 1) {
+            current[part] = { ...p, type: 'file' };
+          } else {
+            if (!current[part]) current[part] = { type: 'folder', children: {} };
+            current = current[part].children;
+          }
+        });
+      });
+      return tree;
+    }
+
+    const tree = buildTree(PROJECTS);
+    let currentPath = [];
+    const grid = document.getElementById('projectsGrid');
+    const nav = document.getElementById('nav');
+
+    function render(path) {
+      grid.innerHTML = '';
+      nav.innerHTML = '';
+
+      if (path.length > 0) {
+        const back = document.createElement('div');
+        back.className = 'back-btn';
+        back.textContent = '← Back';
+        back.onclick = () => {
+          currentPath.pop();
+          render(currentPath);
+          renderBreadcrumb(currentPath);
+        };
+        nav.appendChild(back);
+      }
+
+      let node = tree;
+      for (const p of path) {
+        node = node[p].children;
+      }
+
+      Object.entries(node).forEach(([name, value]) => {
+        const card = document.createElement('div');
+        card.className = 'card';
+
+        const title = document.createElement('h2');
+        title.textContent = name;
+
+        const desc = document.createElement('p');
+        desc.textContent = value.type === 'folder' ? 'Folder' : value.id;
+
+        card.appendChild(title);
+        card.appendChild(desc);
+
+        if (value.type === 'folder') {
+          card.onclick = () => {
+            currentPath.push(name);
+            render(currentPath);
+            renderBreadcrumb(currentPath);
+          };
+        } else {
+          card.onclick = () => window.open(value.relpath, '_blank');
+        }
+
+        grid.appendChild(card);
+      });
+    }
+
+    function renderBreadcrumb(path) {
+      const breadcrumb = document.getElementById('breadcrumb');
+      breadcrumb.innerHTML = '';
+
+      const root = document.createElement('span');
+      root.textContent = 'Home';
+      root.onclick = () => {
+        currentPath = [];
+        render(currentPath);
+        renderBreadcrumb(currentPath);
+      };
+      breadcrumb.appendChild(root);
+
+      path.forEach((p, i) => {
+        const sep = document.createElement('span');
+        sep.textContent = '›';
+        sep.className = 'sep';
+        breadcrumb.appendChild(sep);
+
+        const crumb = document.createElement('span');
+        crumb.textContent = p;
+        crumb.onclick = () => {
+          currentPath = path.slice(0, i + 1);
+          render(currentPath);
+          renderBreadcrumb(currentPath);
+        };
+        breadcrumb.appendChild(crumb);
+      });
+    }
+
+    render(currentPath);
+    renderBreadcrumb(currentPath);
+  </script>
+</body>
+</html>

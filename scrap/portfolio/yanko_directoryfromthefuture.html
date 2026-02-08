@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Yanko</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 40px;
+      background: linear-gradient(135deg, #a7e2ff, #f0f9ff);
+      background-attachment: fixed;
+      position: relative;
+    }
+
+    h1 {
+      font-size: 3rem;
+      margin-bottom: 8px;
+      color: #004aad;
+      text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.8);
+    }
+
+    h2 {
+      font-weight: 400;
+      color: #005f73;
+      font-size: 1.3rem;
+      margin-bottom: 40px;
+      text-shadow: 1px 1px 1px rgba(255, 255, 255, 0.7);
+    }
+
+    .container {
+      backdrop-filter: blur(14px) saturate(160%);
+      -webkit-backdrop-filter: blur(14px) saturate(160%);
+      background-color: rgba(255, 255, 255, 0.55);
+      border-radius: 20px;
+      padding: 30px;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+      width: 100%;
+      max-width: 700px;
+      margin-bottom: 40px;
+      animation: float 6s ease-in-out infinite;
+    }
+
+    .search-box {
+      margin-bottom: 25px;
+      width: 100%;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 14px 18px;
+      font-size: 1rem;
+      border-radius: 12px;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      outline: none;
+      background: rgba(255, 255, 255, 0.8);
+      transition: all 0.3s ease;
+    }
+
+    input[type="text"]:focus {
+      border-color: #00b4d8;
+      background: rgba(255, 255, 255, 0.95);
+      box-shadow: 0 0 10px rgba(0,180,216,0.4);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      border-radius: 12px;
+      overflow: hidden;
+      background: rgba(255,255,255,0.9);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.05);
+    }
+
+    thead {
+      background: linear-gradient(90deg, #00b4d8, #0096c7);
+      color: white;
+      font-weight: 600;
+    }
+
+    th, td {
+      text-align: left;
+      padding: 14px 18px;
+    }
+
+    tbody tr:nth-child(odd) {
+      background: rgba(240, 249, 255, 0.7);
+    }
+
+    tbody tr:hover {
+      background: rgba(0, 180, 216, 0.1);
+      transition: background 0.3s ease;
+      cursor: pointer;
+    }
+
+    a {
+      color: #0077ff;
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-5px); }
+    }
+
+    /* Hover Preview Box */
+    .preview-box {
+    position: absolute;
+    width: 250px;
+    padding: 15px;
+    background: rgba(255,255,255,0.95);
+    border-radius: 15px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+    text-align: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.4s ease, top 0.3s ease;
+    }
+
+    .preview-box img {
+    max-width: 100%;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    }
+
+    .preview-box p {
+    font-size: 1rem;
+    color: #004aad;
+    font-weight: bold;
+    }
+
+    .preview-box.show {
+    opacity: 1;
+    pointer-events: auto;
+    }
+    /* Footer */
+    footer {
+      font-size: 0.9rem;
+      color: #004aad;
+      opacity: 0.8;
+      text-align: center;
+      padding: 15px 0;
+      margin-top: auto;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Yanko</h1>
+  <h2>A Directory from the Future</h2>
+
+  <div class="container">
+    <div class="search-box">
+      <input type="text" id="searchInput" placeholder="Search projects...">
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Project Name</th>
+          <th>Link</th>
+        </tr>
+      </thead>
+      <tbody id="projectTable">
+        <tr data-img="https://i.postimg.cc/j5pWLdsG/thesun.png" data-title="Projects Made for Future Use">
+          <td>All Projects</td>
+          <td><a href="../../redir/fd/fd.html" target="_blank">Visit</a></td>
+        </tr>
+        <tr data-img="https://i.postimg.cc/c44VbbsN/links.png" data-title="Links Found while Researching">
+          <td>Interesting Links</td>
+          <td><a href="../../projects\linksort\index.html" target="_blank">Visit</a></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <footer>
+    Website created by <strong>rayofgoldenlight</strong>
+  </footer>
+
+  <!-- Preview Box -->
+  <div class="preview-box" id="previewBox">
+    <img id="previewImg" src="" alt="Preview Image">
+    <p id="previewTitle"></p>
+  </div>
+
+  <script>
+    const searchInput = document.getElementById('searchInput');
+    const tableRows = document.querySelectorAll('#projectTable tr');
+    const previewBox = document.getElementById('previewBox');
+    const previewImg = document.getElementById('previewImg');
+    const previewTitle = document.getElementById('previewTitle');
+
+    // Search functionality
+    searchInput.addEventListener('keyup', () => {
+      const filter = searchInput.value.toLowerCase();
+      tableRows.forEach(row => {
+        const text = row.innerText.toLowerCase();
+        row.style.display = text.includes(filter) ? '' : 'none';
+      });
+    });
+
+    // Hover preview after 300ms
+    let hoverTimer;
+
+    tableRows.forEach(row => {
+    row.addEventListener('mouseenter', (event) => {
+        hoverTimer = setTimeout(() => {
+        const rect = row.getBoundingClientRect(); // Get row position
+        const tableRect = row.closest('table').getBoundingClientRect(); // Get table position
+
+        previewImg.src = row.dataset.img;
+        previewTitle.textContent = row.dataset.title;
+
+        // Calculate position:
+        // Right edge of table + 20px
+        const left = tableRect.right + 20;
+        // Centered relative to hovered row
+        const top = rect.top + (rect.height / 2) - (previewBox.offsetHeight / 2);
+
+        previewBox.style.left = `${left}px`;
+        previewBox.style.top = `${top}px`;
+
+        previewBox.classList.add('show');
+        }, 300);
+    });
+
+    row.addEventListener('mouseleave', () => {
+        clearTimeout(hoverTimer);
+        previewBox.classList.remove('show');
+    });
+    });
+  </script>
+
+</body>
+</html>

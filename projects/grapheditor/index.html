@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Project: Segara</title>
+  <link rel="icon" type="image/x-icon" href="https://i.postimg.cc/WpBMQmVy/gl-ll.png">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="app">
+    <h1>Graphing Calculator</h1>
+    <input id="expressionInput" type="text" value="x^2+x-4" 
+      placeholder="Enter a function, e.g. sin(a*x+b)+c" />
+
+    <div class="controls">
+      <div class="sliders">
+        <div>
+          <label for="a">a: <span id="aValue">1.00</span></label>
+          <input id="a" type="range" min="-5" max="5" step="0.01" value="1">
+        </div>
+        <div>
+          <label for="b">b: <span id="bValue">1.00</span></label>
+          <input id="b" type="range" min="-5" max="5" step="0.01" value="1">
+        </div>
+        <div>
+          <label for="c">c: <span id="cValue">0.00</span></label>
+          <input id="c" type="range" min="-10" max="10" step="0.01" value="0">
+        </div>
+      </div>
+      <canvas id="gameCanvas" width="900" height="600"></canvas>
+    </div>
+
+    <small>
+      <p>Instructions:</p>
+        <p>Press <b>Enter</b> to fire the laser (3s cooldown). </p>
+      <p><b>Click</b> to drop a bomb (4s cooldown) that destroys waves.</p> 
+      <p>Functions: sin, cos, tan, abs, sqrt; Tip: Use sliders to aim!</p>
+      <p>Aim for the highest score!</p>
+      <p>*Game converted from ts to js for ease of use</p>
+      <p>Tool created by <strong>rayofgoldenlight</strong></p>
+    </small>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

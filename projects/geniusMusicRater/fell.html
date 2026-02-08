@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Song Analysis Visualization</title>
+<style>
+  body {
+    font-family: "Georgia", serif;
+    margin: 0;
+    padding: 20px;
+    background: #fffdf8;
+    color: #222;
+  }
+  h1, h2 {
+    text-align: center;
+    font-weight: normal;
+    color: #222;
+  }
+  h1 {
+    border-bottom: 2px solid #f0d879;
+    padding-bottom: 10px;
+    margin-bottom: 30px;
+  }
+  .container {
+    max-width: 1000px;
+    margin: auto;
+  }
+  .section {
+    background: #ffffff;
+    padding: 20px;
+    margin: 20px 0;
+    border-radius: 12px;
+    border: 1px solid #e6e2d3;
+    box-shadow: 2px 2px 6px rgba(0,0,0,0.05);
+  }
+  .section h2 {
+    background: #fdf5d9;
+    padding: 8px 12px;
+    border-left: 4px solid #f0d879;
+    border-radius: 6px;
+    font-size: 1.2em;
+    margin-bottom: 15px;
+  }
+  .collapsible {
+    cursor: pointer;
+    padding: 10px;
+    border: none;
+    outline: none;
+    width: 100%;
+    background: #f7f4ec;
+    color: #222;
+    border-radius: 6px;
+    margin-bottom: 8px;
+    text-align: left;
+    font-weight: bold;
+    transition: background 0.2s;
+  }
+  .collapsible:hover {
+    background: #f0e9d2;
+  }
+  .content {
+    display: none;
+    padding-left: 10px;
+    margin-top: 10px;
+  }
+  .score {
+    font-weight: bold;
+    font-size: 1.1em;
+    color: #222;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+    font-size: 0.95em;
+  }
+  td, th {
+    border: 1px solid #ddd;
+    padding: 6px 10px;
+    text-align: left;
+  }
+  th {
+    background: #fdf5d9;
+    font-weight: normal;
+    color: #333;
+  }
+  /* Progress bar for scores */
+  .bar {
+    background: #f7f4ec;
+    border-radius: 6px;
+    overflow: hidden;
+    margin: 4px 0;
+    height: 12px;
+  }
+  .bar-fill {
+    height: 100%;
+    background: #f0d879;
+    width: 0;
+    transition: width 1s ease-out;
+  }
+    /* Add this inside your <style> block */
+  .timeline {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 12px;
+    }
+    .chord-block {
+    background: #fdf5d9;
+    border: 1px solid #f0d879;
+    padding: 10px 14px;
+    border-radius: 10px;
+    box-shadow: 2px 2px 4px rgba(0,0,0,0.05);
+    font-family: "Georgia", serif;
+    flex: 0 0 auto;
+    text-align: center;
+    }
+    .chord-name {
+    font-size: 1em;
+    color: #111;
+    }
+    .chord-time {
+    font-size: 0.8em;
+    color: #555;
+    margin-top: 2px;
+    }
+    #audioPlayer {
+  width: 100%;
+  max-width: 600px;
+  display: block;
+  margin: 10px auto;
+  border-radius: 12px;
+  box-shadow: 2px 2px 6px rgba(0,0,0,0.1);
+}
+
+#audioPlayer::-webkit-media-controls-panel {
+  background-color: #fffdf8; /* white/light panel */
+  color: #222; /* black text */
+}
+
+#audioPlayerSection h2 {
+  background: #fdf5d9;
+  padding: 8px 12px;
+  border-left: 4px solid #f0d879;
+  border-radius: 6px;
+  font-size: 1.2em;
+  color: #222;
+  text-align: center;
+  margin-bottom: 15px;
+}
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>Song Analysis: <span id="fileName"></span></h1>
+  <div class="section" id="audioPlayerSection">
+  <h2>Listen to the Song</h2>
+  <audio id="audioPlayer" controls>
+    <source src="https://audio.jukehost.co.uk/yIvz91Fzqs49bqJvoM5NHOcPZppe8yey" type="audio/mpeg">
+    Your browser does not support the audio element.
+  </audio>
+</div>
+
+  <div class="section" id="geniusScore">
+    <h2>Genius Score</h2>
+    <p>Overall Score: <span class="score" id="overallScore"></span></p>
+    <div class="bar"><div class="bar-fill" id="overallBar"></div></div>
+    <p>Is Genius: <span id="isGenius"></span></p>
+    <p>Confidence: <span id="geniusConfidence"></span></p>
+    <button class="collapsible">Category Scores & Explanation</button>
+    <div class="content" id="categoryScores"></div>
+  </div>
+
+  <div class="section" id="basicStats">
+    <h2>Basic Stats</h2>
+    <div id="basicStatsContent"></div>
+  </div>
+
+  <div class="section" id="features">
+    <h2>Features</h2>
+    <div id="featuresContent"></div>
+  </div>
+
+  <div class="section" id="rhythm">
+    <h2>Rhythm</h2>
+    <div id="rhythmContent"></div>
+  </div>
+
+  <div class="section" id="harmony">
+    <h2>Harmony</h2>
+    <div id="harmonyContent"></div>
+  </div>
+
+  <div class="section" id="melody">
+    <h2>Melody</h2>
+    <div id="melodyContent"></div>
+  </div>
+
+  <div class="section" id="structure">
+    <h2>Structure</h2>
+    <div id="structureContent"></div>
+  </div>
+
+  <div class="section" id="production">
+    <h2>Production</h2>
+    <div id="productionContent"></div>
+  </div>
+
+  <div class="section" id="psychoacoustics">
+    <h2>Psychoacoustics</h2>
+    <div id="psychoContent"></div>
+  </div>
+</div>
+
+<script>
+/* Your same JSON data here */
+const data = {
+  "file": "fell.mp3",
+  "original": {
+    "sample_rate": 44100,
+    "channels": 2,
+    "frames": 7665408
+  },
+  "analysis_basis": {
+    "resampled_sample_rate": 44100,
+    "mono_frames": 7665408
+  },
+  "basic_stats": {
+    "duration_seconds": 173.818776,
+    "rms": 0.261967,
+    "peak": 1.015653,
+    "dc_offset": 0.000071,
+    "zero_crossings_per_second": 2250.585409
+  },
+  "features": {
+    "tempo_bpm": 139.67,
+    "key": "A min",
+    "spectral": {
+      "centroid": 731.19,
+      "rolloff": 1240.04,
+      "brightness": 0.0974,
+      "mfcc": [21.8269, 58.3932, -5.6552, 14.4566, -9.9334, 11.7142, -3.2807, 7.4748, -3.8821, 6.7097, -1.6258, 5.1956, -4.6765]
+    }
+  },
+  "psychoacoustics": {
+    "roughness": 0.184991,
+    "dissonance": 0.257785,
+    "loudness_lu": -12.17,
+    "dynamic_range_db": 15.11
+  },
+  "ratings": {
+    "harmonic_quality": 65,
+    "progression_quality": 83,
+    "pleasantness": 51,
+    "creativity": 73,
+    "overall_grade": 68,
+    "rating_profile": "default"
+  },
+    "rhythm": {
+      "tempo_bpm": 139.67,
+      "tempo_confidence": 0.02,
+      "beat_strength": 0.0270,
+      "pulse_clarity": 0.5125,
+      "syncopation": 0.4875,
+      "swing_ratio": 1.04
+    },
+  "harmony": {
+    "global_key": "C#m",
+    "key_stability": 0.933,
+    "modulation_count": 9.0,
+    "harmonic_motion": 0.669,
+    "tension": 0.260,
+    "chords": [{"time_sec": 0.00, "name": "Am"}, {"time_sec": 0.93, "name": "C#m"}, {"time_sec": 1.86, "name": "C#m"}, {"time_sec": 2.79, "name": "C#m"}, {"time_sec": 3.72, "name": "G#m"}, {"time_sec": 4.64, "name": "F#m"}, {"time_sec": 5.57, "name": "G"}, {"time_sec": 6.50, "name": "A"}, {"time_sec": 7.43, "name": "G#"}, {"time_sec": 8.36, "name": "C#m"}, {"time_sec": 9.29, "name": "G#"}, {"time_sec": 10.22, "name": "Fm"}, {"time_sec": 11.15, "name": "Cm"}, {"time_sec": 12.07, "name": "Am"}, {"time_sec": 13.00, "name": "C"}, {"time_sec": 13.93, "name": "C#m"}, {"time_sec": 14.86, "name": "C#m"}, {"time_sec": 15.79, "name": "C#m"}, {"time_sec": 16.72, "name": "F#m"}, {"time_sec": 17.65, "name": "Am"}, {"time_sec": 18.58, "name": "E"}, {"time_sec": 19.50, "name": "E"}, {"time_sec": 20.43, "name": "G#"}, {"time_sec": 21.36, "name": "A"}, {"time_sec": 22.29, "name": "A"}, {"time_sec": 23.22, "name": "F#"}, {"time_sec": 24.15, "name": "Am"}, {"time_sec": 25.08, "name": "G#"}, {"time_sec": 26.01, "name": "C#m"}, {"time_sec": 26.94, "name": "E"}, {"time_sec": 27.86, "name": "C#m"}, {"time_sec": 28.79, "name": "C#m"}, {"time_sec": 29.72, "name": "F#m"}, {"time_sec": 30.65, "name": "F#m"}, {"time_sec": 31.58, "name": "G#"}, {"time_sec": 32.51, "name": "G#"}, {"time_sec": 33.44, "name": "Fm"}, {"time_sec": 34.37, "name": "E"}, {"time_sec": 35.29, "name": "C#m"}, {"time_sec": 36.22, "name": "E"}, {"time_sec": 37.15, "name": "F#m"}, {"time_sec": 38.08, "name": "A"}, {"time_sec": 39.01, "name": "F#m"}, {"time_sec": 39.94, "name": "C#m"}, {"time_sec": 40.87, "name": "E"}, {"time_sec": 41.80, "name": "C#m"}, {"time_sec": 42.72, "name": "B"}, {"time_sec": 43.65, "name": "F#m"}, {"time_sec": 44.58, "name": "E"}, {"time_sec": 45.51, "name": "C#m"}, {"time_sec": 46.44, "name": "C#m"}, {"time_sec": 47.37, "name": "C#m"}, {"time_sec": 48.30, "name": "G#m"}, {"time_sec": 49.23, "name": "C#"}, {"time_sec": 50.16, "name": "B"}, {"time_sec": 51.08, "name": "C#m"}, {"time_sec": 52.01, "name": "A"}, {"time_sec": 52.94, "name": "G#"}, {"time_sec": 53.87, "name": "G#"}, {"time_sec": 54.80, "name": "E"}, {"time_sec": 55.73, "name": "C#"}, {"time_sec": 56.66, "name": "G#m"}, {"time_sec": 57.59, "name": "E"}, {"time_sec": 58.51, "name": "G#m"}, {"time_sec": 59.44, "name": "C#"}, {"time_sec": 60.37, "name": "G#m"}, {"time_sec": 61.30, "name": "C#"}, {"time_sec": 62.23, "name": "G#m"}, {"time_sec": 63.16, "name": "Am"}, {"time_sec": 64.09, "name": "D#m"}, {"time_sec": 65.02, "name": "C#m"}, {"time_sec": 65.94, "name": "G#"}, {"time_sec": 66.87, "name": "G#"}, {"time_sec": 67.80, "name": "C#m"}, {"time_sec": 68.73, "name": "C#m"}, {"time_sec": 69.66, "name": "C#m"}, {"time_sec": 70.59, "name": "G#m"}, {"time_sec": 71.52, "name": "C#m"}, {"time_sec": 72.45, "name": "F#"}, {"time_sec": 73.38, "name": "C"}, {"time_sec": 74.30, "name": "Fm"}, {"time_sec": 75.23, "name": "A"}, {"time_sec": 76.16, "name": "G#"}, {"time_sec": 77.09, "name": "E"}, {"time_sec": 78.02, "name": "C#"}, {"time_sec": 78.95, "name": "E"}, {"time_sec": 79.88, "name": "C"}, {"time_sec": 80.81, "name": "C"}, {"time_sec": 81.73, "name": "G#"}, {"time_sec": 82.66, "name": "C"}, {"time_sec": 83.59, "name": "C#m"}, {"time_sec": 84.52, "name": "C#m"}, {"time_sec": 85.45, "name": "F#m"}, {"time_sec": 86.38, "name": "G#"}, {"time_sec": 87.31, "name": "G#"}, {"time_sec": 88.24, "name": "C"}, {"time_sec": 89.16, "name": "E"}, {"time_sec": 90.09, "name": "C#"}, {"time_sec": 91.02, "name": "E"}, {"time_sec": 91.95, "name": "F#"}, {"time_sec": 92.88, "name": "Am"}, {"time_sec": 93.81, "name": "D#m"}, {"time_sec": 94.74, "name": "G#"}, {"time_sec": 95.67, "name": "Am"}, {"time_sec": 96.60, "name": "E"}, {"time_sec": 97.52, "name": "C#"}, {"time_sec": 98.45, "name": "F#"}, {"time_sec": 99.38, "name": "F#m"}, {"time_sec": 100.31, "name": "G#"}, {"time_sec": 101.24, "name": "C#m"}, {"time_sec": 102.17, "name": "G#m"}, {"time_sec": 103.10, "name": "E"}, {"time_sec": 104.03, "name": "C#m"}, {"time_sec": 104.95, "name": "C#m"}, {"time_sec": 105.88, "name": "F#m"}, {"time_sec": 106.81, "name": "F"}, {"time_sec": 107.74, "name": "F#m"}, {"time_sec": 108.67, "name": "C#m"}, {"time_sec": 109.60, "name": "E"}, {"time_sec": 110.53, "name": "C#"}, {"time_sec": 111.46, "name": "B"}, {"time_sec": 112.38, "name": "F#m"}, {"time_sec": 113.31, "name": "C#m"}, {"time_sec": 114.24, "name": "G#"}, {"time_sec": 115.17, "name": "G#"}, {"time_sec": 116.10, "name": "C#"}, {"time_sec": 117.03, "name": "G#m"}, {"time_sec": 117.96, "name": "C#m"}, {"time_sec": 118.89, "name": "B"}, {"time_sec": 119.81, "name": "G#"}, {"time_sec": 120.74, "name": "C#m"}, {"time_sec": 121.67, "name": "C#m"}, {"time_sec": 122.60, "name": "C#m"}, {"time_sec": 123.53, "name": "E"}, {"time_sec": 124.46, "name": "C#m"}, {"time_sec": 125.39, "name": "B"}, {"time_sec": 126.32, "name": "D#m"}, {"time_sec": 127.25, "name": "C#"}, {"time_sec": 128.17, "name": "G#m"}, {"time_sec": 129.10, "name": "G#m"}, {"time_sec": 130.03, "name": "A"}, {"time_sec": 130.96, "name": "C#"}, {"time_sec": 131.89, "name": "E"}, {"time_sec": 132.82, "name": "F#m"}, {"time_sec": 133.75, "name": "G#m"}, {"time_sec": 134.68, "name": "C#m"}, {"time_sec": 135.60, "name": "C#m"}, {"time_sec": 136.53, "name": "G#"}, {"time_sec": 137.46, "name": "G#"}, {"time_sec": 138.39, "name": "G#m"}, {"time_sec": 139.32, "name": "B"}, {"time_sec": 140.25, "name": "F#m"}, {"time_sec": 141.18, "name": "C#"}, {"time_sec": 142.11, "name": "G#"}, {"time_sec": 143.03, "name": "C#"}, {"time_sec": 143.96, "name": "E"}, {"time_sec": 144.89, "name": "C#"}, {"time_sec": 145.82, "name": "Fm"}, {"time_sec": 146.75, "name": "Em"}, {"time_sec": 147.68, "name": "G#"}, {"time_sec": 148.61, "name": "F#m"}, {"time_sec": 149.54, "name": "G#m"}, {"time_sec": 150.47, "name": "G#m"}, {"time_sec": 151.39, "name": "G#m"}, {"time_sec": 152.32, "name": "G#"}, {"time_sec": 153.25, "name": "B"}, {"time_sec": 154.18, "name": "E"}, {"time_sec": 155.11, "name": "C#m"}, {"time_sec": 156.04, "name": "G#"}, {"time_sec": 156.97, "name": "C#m"}, {"time_sec": 157.90, "name": "G#m"}, {"time_sec": 158.82, "name": "G#m"}, {"time_sec": 159.75, "name": "B"}, {"time_sec": 160.68, "name": "G#"}, {"time_sec": 161.61, "name": "A"}, {"time_sec": 162.54, "name": "A"}, {"time_sec": 163.47, "name": "G#m"}, {"time_sec": 164.40, "name": "G#"}, {"time_sec": 165.33, "name": "C"}, {"time_sec": 166.25, "name": "C#m"}, {"time_sec": 167.18, "name": "Am"}, {"time_sec": 168.11, "name": "Bm"}, {"time_sec": 169.04, "name": "Em"}, {"time_sec": 169.97, "name": "E"}, {"time_sec": 170.90, "name": "D#m"}, {"time_sec": 171.83, "name": "D"}, {"time_sec": 172.76, "name": "F#"}]
+  },
+  "melody": {
+    "median_f0": 796.50,
+    "mean_f0": 652.59,
+    "f0_confidence": 0.044,
+    "pitch_range_semitones": 46.00,
+    "contour_count": 95,
+    "avg_contour_length_sec": 0.081,
+    "longest_contour_sec": 0.232,
+    "avg_interval_semitones": -0.135,
+    "avg_abs_interval_semitones": 1.167,
+    "melodic_entropy": 0.660,
+    "motif_repetition_rate": 0.557,
+    "motif_count": 293,
+    "hook_strength": 0.010
+  },
+  "structure": {
+    "section_count": 6,
+    "arc_complexity": 0.983,
+    "repetition_ratio": 1.000,
+    "section_durations": [25.50, 27.50, 36.00, 21.00, 41.00, 22.82],
+    "duration_ratio": 1.95,
+    "section_labels_summary": {
+      "intro": 1,
+      "verse": 2,
+      "chorus": 1,
+      "bridge": 1,
+      "outro": 1
+    },
+    "has_chorus": true,
+    "structural_arcs": [0.000, 0.147, 0.305, 0.512, 0.633, 0.869],
+    "sections": [{"start_sec": 0.00, "end_sec": 25.50, "label": "intro"}, {"start_sec": 25.50, "end_sec": 53.00, "label": "verse"}, {"start_sec": 53.00, "end_sec": 89.00, "label": "verse"}, {"start_sec": 89.00, "end_sec": 110.00, "label": "bridge"}, {"start_sec": 110.00, "end_sec": 151.00, "label": "chorus"}, {"start_sec": 151.00, "end_sec": 173.82, "label": "outro"}]
+  },
+  "production": {
+    "loudness_db": -11.29,
+    "dynamic_range_db": 12.25,
+    "stereo_width": 0.848,
+    "spectral_balance": 0.779,
+    "masking_index": 0.015
+  },
+  "genius": {
+    "overall_score": 54,
+    "is_genius": false,
+    "confidence": 0.031,
+    "categories": {
+      "harmony": 86,
+      "progression": 66,
+      "melody": 24,
+      "rhythm": 49,
+      "structure": 78,
+      "timbre": 62,
+      "creativity": 62,
+    "originality_score": 53,
+    "complexity_score": 60,
+    "genre_distance_score": 33,
+    "emotion_score": 42,
+    "explanation": {
+      "positive_contributors": [],
+      "negative_contributors": ["Technical penalties applied (7)", "Unstable rhythm/pulse (score 49)"]
+    }
+    }
+  }
+}
+;
+
+/* Populate title */
+document.getElementById("fileName").innerText = data.file;
+document.getElementById("overallScore").innerText = data.genius.overall_score;
+document.getElementById("isGenius").innerText = data.genius.is_genius ? "Yes" : "No";
+document.getElementById("geniusConfidence").innerText = data.genius.confidence;
+
+/* Animate overall bar */
+document.getElementById("overallBar").style.width = data.genius.overall_score + "%";
+
+/* Collapsible function */
+document.querySelectorAll(".collapsible").forEach(btn => {
+  btn.addEventListener("click", () => {
+    btn.nextElementSibling.style.display = 
+      btn.nextElementSibling.style.display === "block" ? "none" : "block";
+  });
+});
+
+/* Utility to render key-value tables */
+function renderTable(obj) {
+  let html = "<table>";
+  for (let key in obj) {
+    let val = obj[key];
+    if (Array.isArray(val) && val.length > 0 && typeof val[0] === "object") {
+      val = val.map(v => JSON.stringify(v)).join("<br>");
+    } else if (typeof val === "object" && val !== null) {
+      val = JSON.stringify(val);
+    }
+    html += `<tr><th>${key}</th><td>${val}</td></tr>`;
+  }
+  html += "</table>";
+  return html;
+}
+
+/* Genius categories */
+let catHtml = "<table>";
+for (let cat in data.genius.categories) {
+  if (cat === "explanation") continue;
+  catHtml += `<tr><th>${cat}</th>
+  <td><div class="bar"><div class="bar-fill" style="width:${data.genius.categories[cat]}%"></div></div>
+  ${data.genius.categories[cat]}</td></tr>`;
+}
+catHtml += "</table>";
+
+catHtml += "<h4>Explanation</h4>";
+catHtml += "<b>Positive:</b> " + (data.genius.categories.explanation.positive_contributors.join(", ") || "None") + "<br>";
+catHtml += "<b>Negative:</b> " + data.genius.categories.explanation.negative_contributors.join(", ");
+
+document.getElementById("categoryScores").innerHTML = catHtml;
+
+/* Populate other sections */
+document.getElementById("basicStatsContent").innerHTML = renderTable(data.basic_stats);
+//features section
+const features = data.features;
+let featuresHtml = "<table>";
+featuresHtml += `<tr><th>Tempo (BPM)</th><td>${features.tempo_bpm}</td></tr>`;
+featuresHtml += `<tr><th>Key</th><td>${features.key}</td></tr>`;
+
+// Spectral data as a nested table
+featuresHtml += `<tr><th>Spectral</th><td>
+  <table style="border-collapse: collapse; width: 100%; margin-top: 8px;">
+    <tr>
+      <th style="text-align:left; padding: 6px; border-bottom: 1px solid #eee;">Centroid</th>
+      <td style="padding: 6px;">${features.spectral.centroid.toFixed(2)}</td>
+    </tr>
+    <tr>
+      <th style="text-align:left; padding: 6px; border-bottom: 1px solid #eee;">Rolloff</th>
+      <td style="padding: 6px;">${features.spectral.rolloff.toFixed(2)}</td>
+    </tr>
+    <tr>
+      <th style="text-align:left; padding: 6px; border-bottom: 1px solid #eee;">Brightness</th>
+      <td style="padding: 6px;">${features.spectral.brightness.toFixed(4)}</td>
+    </tr>
+    <tr>
+      <th style="text-align:left; padding: 6px; border-bottom: 1px solid #eee;">MFCC</th>
+      <td style="padding: 6px;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(60px, 1fr)); gap: 6px;">
+          ${features.spectral.mfcc.map((val, i) => `
+            <div style="
+              background: ${val >= 0 ? '#fff9e6' : '#ffe6e6'};
+              border: 1px solid #ddd;
+              border-radius: 4px;
+              padding: 6px;
+              text-align: center;
+              font-size: 0.9em;
+            ">
+              C${i+1}<br><b>${val.toFixed(2)}</b>
+            </div>
+          `).join("")}
+        </div>
+      </td>
+    </tr>
+  </table>
+</td></tr>`;
+featuresHtml += "</table>";
+
+document.getElementById("featuresContent").innerHTML = featuresHtml;
+document.getElementById("rhythmContent").innerHTML = renderTable(data.rhythm);
+//harmony section
+const harmony = data.harmony;
+let harmonyHtml = "<table>";
+harmonyHtml += `<tr><th>Global Key</th><td>${harmony.global_key}</td></tr>`;
+harmonyHtml += `<tr><th>Key Stability</th><td>${harmony.key_stability}</td></tr>`;
+harmonyHtml += `<tr><th>Modulation Count</th><td>${harmony.modulation_count}</td></tr>`;
+harmonyHtml += `<tr><th>Harmonic Motion</th><td>${harmony.harmonic_motion}</td></tr>`;
+harmonyHtml += `<tr><th>Tension</th><td>${harmony.tension}</td></tr>`;
+
+harmonyHtml += `<tr><th>Chord Progression</th><td><div class="timeline">`;
+
+// Show chord + time
+harmony.chords.forEach(ch => {
+  harmonyHtml += `
+    <div class="chord-block">
+      <div class="chord-name">${ch.name}</div>
+      <div class="chord-time">${ch.time_sec.toFixed(2)}s</div>
+    </div>
+  `;
+});
+
+harmonyHtml += `</div></td></tr></table>`;
+document.getElementById("harmonyContent").innerHTML = harmonyHtml;
+
+  /* --- Keep the rest the same --- */
+  document.getElementById("melodyContent").innerHTML = renderTable(data.melody);
+  //structures section
+  const structure = data.structure;
+let structureHtml = "<table>";
+structureHtml += `<tr><th>Section Count</th><td>${structure.section_count}</td></tr>`;
+structureHtml += `<tr><th>Arc Complexity</th><td>${structure.arc_complexity}</td></tr>`;
+structureHtml += `<tr><th>Repetition Ratio</th><td>${structure.repetition_ratio}</td></tr>`;
+structureHtml += `<tr><th>Duration Ratio</th><td>${structure.duration_ratio}</td></tr>`;
+structureHtml += `<tr><th>Has Chorus</th><td>${structure.has_chorus ? "Yes" : "No"}</td></tr>`;
+
+// Section Labels Summary
+structureHtml += `<tr><th>Labels Summary</th><td>
+  <table style="border-collapse: collapse; width: 100%; margin-top: 8px;">
+    <tr>
+      <th style="text-align:left; padding: 6px; border-bottom: 1px solid #eee;">Label</th>
+      <th style="text-align:left; padding: 6px; border-bottom: 1px solid #eee;">Count</th>
+    </tr>`;
+for (const [label, count] of Object.entries(structure.section_labels_summary)) {
+  structureHtml += `
+    <tr>
+      <td style="padding: 6px;">${label}</td>
+      <td style="padding: 6px;">${count}</td>
+    </tr>`;
+}
+structureHtml += `</table></td></tr>`;
+
+// Sections table
+structureHtml += `<tr><th>Sections</th><td>
+  <table style="border-collapse: collapse; width: 100%; margin-top: 8px;">
+    <tr>
+      <th style="text-align:left; padding: 6px; border-bottom: 1px solid #eee;">Start (s)</th>
+      <th style="text-align:left; padding: 6px; border-bottom: 1px solid #eee;">End (s)</th>
+      <th style="text-align:left; padding: 6px; border-bottom: 1px solid #eee;">Duration</th>
+      <th style="text-align:left; padding: 6px; border-bottom: 1px solid #eee;">Label</th>
+    </tr>`;
+
+structure.sections.forEach(sec => {
+  const duration = (sec.end_sec - sec.start_sec).toFixed(2);
+  structureHtml += `
+    <tr>
+      <td style="padding: 6px;">${sec.start_sec.toFixed(2)}</td>
+      <td style="padding: 6px;">${sec.end_sec.toFixed(2)}</td>
+      <td style="padding: 6px;">${duration}</td>
+      <td style="padding: 6px;">${sec.label}</td>
+    </tr>`;
+});
+
+structureHtml += `</table></td></tr></table>`;
+document.getElementById("structureContent").innerHTML = structureHtml;
+  document.getElementById("productionContent").innerHTML = renderTable(data.production);
+  document.getElementById("psychoContent").innerHTML = renderTable(data.psychoacoustics);
+</script>
+</body>
+</html>

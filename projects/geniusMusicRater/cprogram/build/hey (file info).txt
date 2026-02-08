@@ -1,0 +1,42 @@
+Hey!
+
+Download mp3_analyzer.exe
+This is the Genius Music Detector.
+
+Usage: mp3_analyzer.exe  [genre] [--m(elody)] [--s(tructure)] [--g(enius)]
+Genres: rap, vgm, pop, experimental, phonk, default
+Flags:  --m // --melody     enable melody feature extraction
+       --s // --structure  enable structure feature extraction
+       --g // --genius  enable genius rating
+
+Windows Examples (Command Prompt):
+mp3_analyzer.exe like_me.mp3 --m --s --g
+^generates 
+mp3_analyzer.exe reafs.mp3 experimental
+
+Linux Examples (Terminal):
+./mp3_analyzer.exe like_me.mp3 --m --s --g
+./mp3_analyzer.exe reafs.mp3 experimental
+
+Note: The HTML song analysis rendering website (https://rayofgoldenlight.github.io/projects/geniusMusicRater/index.html) only supports the JSON pasted if all flags are enabled 
+      (write --m --s --g after your mp3 file if you want to use this site)
+
+Calibration: Set expected “typical good songs” to land ~60–70%, “mediocre” to ~40–50%, “genius” ≥85% 
+Right now, most average tracks get 40–55%
+
+Note (for a 7-minute song): No parameters should run under 10 seconds. All parameters should run under 90 seconds.
+
+The code for this is provided at:
+https://github.com/rayofgoldenlight/rayofgoldenlight.github.io/tree/main/projects/geniusMusicRater/cprogram
+
+Feel free to upgrade upon this program.
+
+I made it.
+I do not hold responsibility with what you do with it.
+
+May you make a song that is truly genius.
+
+
+
+
+Go back to the initial site: rayofgoldenlight.github.io

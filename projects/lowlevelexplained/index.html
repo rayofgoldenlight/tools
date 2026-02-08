@@ -1,0 +1,605 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Project: Denshi</title>
+<link rel="icon" type="image/x-icon" href="https://i.postimg.cc/WpBMQmVy/gl-ll.png">
+<style>
+* {
+  box-sizing: border-box;
+}
+
+:root {
+  --bg: #000011;          /* deep dark background */
+  --card: #0a0a1a;        /* panel background */
+  --accent: #00ffcc;      /* neon cyan */
+  --muted: #66ff99;       /* green glow text */
+  --glass: rgba(0, 255, 200, 0.08);
+}
+
+html, body {
+  height: 100%;
+  margin: 0;
+  font-family: 'Courier New', monospace;
+  color: #00ffcc;
+  background: radial-gradient(circle at center, #000022 0%, #000010 100%);
+  text-shadow: 0 0 2px var(--accent), 0 0 4px var(--accent);
+}
+
+.container{max-width:1200px;margin:28px auto;padding:20px}
+.header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+/* Neon animated title */
+.header h1 {
+  font-size: 1.8rem;
+  margin: 0;
+  font-family: 'Orbitron', sans-serif;
+  background: linear-gradient(90deg, #00ffcc, #7c3aed, #00ffcc);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-size: 300% auto;
+  animation: shine 6s linear infinite;
+  text-shadow: 0 0 8px var(--accent);
+  flex: 1; /* ensures it takes available width, not drop under */
+}
+@keyframes shine {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 100% 50%; }
+}
+/* Circuit glowing logo */
+.logo {
+  width: 64px;
+  height: 64px;
+  border-radius: 12px;
+  background: radial-gradient(circle at center, var(--accent), #021024);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #000;
+  font-weight: bold;
+  font-family: 'Orbitron', sans-serif;
+  box-shadow: 0 0 12px var(--accent), inset 0 0 6px #00ffaa;
+  border: 2px solid var(--accent);
+  position: relative;
+  overflow: hidden;
+}
+
+.logo::after {
+  content: "";
+  position: absolute;
+  width: 150%;
+  height: 150%;
+  top: -25%;
+  left: -25%;
+  background: conic-gradient(from 0deg, transparent, var(--accent), transparent 90deg);
+  animation: rotate 6s linear infinite;
+}
+
+@keyframes rotate {
+  100% { transform: rotate(360deg); }
+}
+
+.h1{font-size:1.6rem;margin:0}
+.intro{color:var(--muted);margin-top:6px}
+
+/* Grid now gives more room to right panel */
+/* Right panel wider and consistent */
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 460px; /* give more breathing room */
+  gap: 18px;
+  margin-top: 18px;
+}
+.right {
+  position: sticky;
+  top: 22px;
+  height: fit-content;
+}
+
+.panel {
+  background: var(--card);
+  border: 1px solid var(--accent);
+  padding: 12px;
+  border-radius: 4px;
+  box-shadow: 0 0 6px var(--accent);
+}
+
+.left{min-height:60vh}
+.right{position:sticky;top:22px;height:fit-content}
+
+.section{border-radius:10px;padding:12px;background:var(--glass);margin-bottom:12px}
+.section h2{margin:0 0 8px 0;font-size:1.05rem}
+
+.item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 10px;
+  border: 1px dashed var(--accent);
+  background: rgba(0, 20, 20, 0.4);
+  cursor: pointer;
+  transition: background 0.2s, transform 0.2s;
+}
+.item:hover {
+  background: rgba(0, 255, 200, 0.15);
+  transform: scale(1.02);
+  box-shadow: 0 0 8px var(--accent);
+}
+
+.badge {
+  width: 36px;
+  height: 36px;
+  border-radius: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #000;
+  color: var(--accent);
+  font-weight: bold;
+  border: 1px solid var(--accent);
+  text-shadow: 0 0 3px var(--accent);
+}
+
+.title{font-weight:600}
+.desc{color:var(--muted);font-size:0.95rem;margin-top:6px}
+.toggle{margin-left:auto;color:var(--muted)}
+.card-body{padding:12px 6px;color:var(--muted);border-top:1px dashed rgba(255,255,255,0.02);}
+.kv{display:flex;gap:8px;align-items:center;font-size:0.9rem}
+.term{font-weight:700;color:#fff}
+.small{font-size:0.85rem;color:var(--muted)}
+.controls{display:flex;gap:8px;margin-top:10px}
+
+.btn {
+  padding: 8px 12px;
+  border-radius: 0;
+  border: 1px solid var(--accent);
+  background: #000;
+  color: var(--accent);
+  text-transform: uppercase;
+  cursor: pointer;
+  font-weight: bold;
+  text-shadow: 0 0 6px var(--accent);
+}
+.btn:hover {
+  background: var(--accent);
+  color: #000;
+  box-shadow: 0 0 12px var(--accent);
+}
+
+.diagram {
+  width: 100%;
+  height: 220px;
+  border: 2px dashed var(--accent);
+  background: #000011;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted);
+  text-shadow: 0 0 8px var(--accent);
+}
+
+.legend .chip{padding:6px 8px;border-radius:999px;background:rgba(255,255,255,0.02);font-size:0.85rem}
+
+/* Better search bar */
+/* Fix search bar width */
+.search {
+  display: block;
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 6px;
+  background: #000011;
+  border: 1px solid var(--accent);
+  color: var(--accent);
+  font-family: 'Courier New', monospace;
+  font-size: 14px;
+  margin-bottom: 14px;
+  box-shadow: inset 0 0 6px rgba(0,255,200,0.2);
+}
+.search::placeholder {
+  color: var(--muted);
+  opacity: 0.8;
+}
+
+.footer{color:var(--muted);font-size:0.85rem;margin-top:14px}
+
+.code {
+  background:#021427;
+  padding:10px;
+  border-radius:8px;
+  color:#bfe3ff;
+  font-family:SFMono-Regular,Menlo,monospace;
+  font-size:0.9rem;
+  overflow:auto
+}
+
+/* Quiz layout fix */
+.quiz {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+  width: 100%;
+}
+
+
+
+.quiz button {
+  flex: 1 1 calc(50% - 8px); /* fit two buttons per row */
+  min-width: 0;              /* override to prevent overflow */
+  padding: 8px 10px;
+  border: 1px solid var(--accent);
+  background: #000;
+  color: var(--accent);
+  font-weight: bold;
+  text-transform: uppercase;
+  text-shadow: 0 0 3px var(--accent);
+  cursor: pointer;
+}
+.quiz button:hover {
+  background: var(--accent);
+  color: #000;
+  text-shadow: none;
+}
+
+.correct{color:#6ee7b7}
+.wrong{color:#fb7185}
+
+/* On smaller screens stack buttons */
+@media(max-width:980px) {
+  .grid {grid-template-columns: 1fr;}
+  .quiz button {flex: 1 1 100%;}
+}
+</style>
+
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <div class="logo">LS</div>
+    <div>
+      <h1 class="h1">Low-Level Systems — Interactive Explainer</h1>
+      <div class="intro">Click each item to reveal simple diagrams, analogies, short code examples, and quick quiz questions. Built to help engineers & students.</div>
+    </div>
+  </div>
+
+  <div class="grid">
+    <div class="panel left">
+
+      <div class="section" id="sec-1">
+        <h2>1. Low-Level Hardware & Fabric</h2>
+        <div class="item" data-key="bare-metal" onclick="show('bare-metal')">
+          <div class="badge">HW</div>
+          <div>
+            <div class="title">Bare-metal</div>
+            <div class="small">Running without an OS — direct control of hardware.</div>
+          </div>
+          <div class="toggle">▶</div>
+        </div>
+
+        <div class="item" data-key="net5" onclick="show('net5')">
+          <div class="badge">F</div>
+          <div>
+            <div class="title">Net5-timed fabric</div>
+            <div class="small">Fabric-level timing & deterministic nets.</div>
+          </div>
+          <div class="toggle">▶</div>
+        </div>
+
+        <div class="item" data-key="runtime" onclick="show('runtime')">
+          <div class="badge">RT</div>
+          <div>
+            <div class="title">Runtime (or absence thereof)</div>
+            <div class="small">What middleware is present or intentionally absent.</div>
+          </div>
+          <div class="toggle">▶</div>
+        </div>
+
+        <div class="item" data-key="hal" onclick="show('hal')">
+          <div class="badge">HAL</div>
+          <div>
+            <div class="title">HAL (Hardware Abstraction Layer)</div>
+            <div class="small">Stable interface to hardware to decouple drivers & code.</div>
+          </div>
+          <div class="toggle">▶</div>
+        </div>
+
+        <div class="item" data-key="clock" onclick="show('clock')">
+          <div class="badge">CLK</div>
+          <div>
+            <div class="title">Clock domain isolation</div>
+            <div class="small">Managing timing between different clock regions.</div>
+          </div>
+          <div class="toggle">▶</div>
+        </div>
+
+        <div class="item" data-key="gate" onclick="show('gate')">
+          <div class="badge">G</div>
+          <div>
+            <div class="title">Gate-level timing closure</div>
+            <div class="small">Ensuring timing constraints at gate netlist stage.</div>
+          </div>
+          <div class="toggle">▶</div>
+        </div>
+
+        <div class="item" data-key="tsv" onclick="show('tsv')">
+          <div class="badge">TSV</div>
+          <div>
+            <div class="title">TSV-aware routing</div>
+            <div class="small">Through-Silicon Vias impact routing & timing.</div>
+          </div>
+          <div class="toggle">▶</div>
+        </div>
+
+        <div class="item" data-key="lowk" onclick="show('lowk')">
+          <div class="badge">LK</div>
+          <div>
+            <div class="title">Low-k routing</div>
+            <div class="small">Materials with low dielectric constant reduce capacitance.</div>
+          </div>
+          <div class="toggle">▶</div>
+        </div>
+
+        <div class="item" data-key="dbb" onclick="show('dbb')">
+          <div class="badge">DBB</div>
+          <div>
+            <div class="title">Dynamic body-biasing</div>
+            <div class="small">Temporarily bias transistor bodies to control speed & leakage.</div>
+          </div>
+          <div class="toggle">▶</div>
+        </div>
+
+        <div class="item" data-key="pwr" onclick="show('pwr')">
+          <div class="badge">PG</div>
+          <div>
+            <div class="title">Fine-grained power gating</div>
+            <div class="small">Shutting off power to small blocks to save energy.</div>
+          </div>
+          <div class="toggle">▶</div>
+        </div>
+      </div>
+
+      <div class="section" id="sec-2">
+        <h2>2. Interconnects & Communication</h2>
+        <div class="item" onclick="show('arb')"><div class="badge">A</div><div><div class="title">Peer-to-peer bus arbitration</div><div class="small">Who gets the bus and when.</div></div><div class="toggle">▶</div></div>
+        <div class="item" onclick="show('mesh')"><div class="badge">M</div><div><div class="title">Distributed request-grant mesh</div><div class="small">Local decisions with global flow control.</div></div><div class="toggle">▶</div></div>
+        <div class="item" onclick="show('gray')"><div class="badge">G</div><div><div class="title">Gray-coded token passing</div><div class="small">Minimize transitions & hazards for tokens.</div></div><div class="toggle">▶</div></div>
+        <div class="item" onclick="show('cross')"><div class="badge">X</div><div><div class="title">Cross-bridge interconnects</div><div class="small">Bridges between different fabrics or buses.</div></div><div class="toggle">▶</div></div>
+      </div>
+
+      <div class="section" id="sec-3">
+        <h2>3. State, Memory & Persistence</h2>
+        <div class="item" onclick="show('fsm')"><div class="badge">FSM</div><div><div class="title">State-machine fallback</div><div class="small">Simpler known-good fallback behavior for failures.</div></div><div class="toggle">▶</div></div>
+        <div class="item" onclick="show('txn')"><div class="badge">TX</div><div><div class="title">Transactional integrity</div><div class="small">Atomic groups of changes: commit or rollback.</div></div><div class="toggle">▶</div></div>
+        <div class="item" onclick="show('nvreg')"><div class="badge">NV</div><div><div class="title">NV register persistence</div><div class="small">Registers that survive power cycles.</div></div><div class="toggle">▶</div></div>
+        <div class="item" onclick="show('persist')"><div class="badge">PS</div><div><div class="title">Persistent state</div><div class="small">State that must be retained across resets & crashes.</div></div><div class="toggle">▶</div></div>
+        <div class="item" onclick="show('ecc')"><div class="badge">ECC</div><div><div class="title">Multi-tier ECC</div><div class="small">Different error-correction levels for different memory types.</div></div><div class="toggle">▶</div></div>
+        <div class="item" onclick="show('wear')"><div class="badge">WL</div><div><div class="title">Wear-leveling controllers</div><div class="small">Spread writes evenly across non-volatile media.</div></div><div class="toggle">▶</div></div>
+        <div class="item" onclick="show('journal')"><div class="badge">AJ</div><div><div class="title">Atomic journaling</div><div class="small">Append-only logs used to guarantee atomic updates.</div></div><div class="toggle">▶</div></div>
+        <div class="item" onclick="show('eeprom')"><div class="badge">EE</div><div><div class="title">EEPROM & FRAM windows</div><div class="small">Small, fast writable non-volatile regions.</div></div><div class="toggle">▶</div></div>
+        <div class="item" onclick="show('resets')"><div class="badge">RST</div><div><div class="title">Resets & Brownouts</div><div class="small">Safe recovery strategies on power events.</div></div><div class="toggle">▶</div></div>
+      </div>
+
+      <div class="section" id="sec-4">
+        <h2>4. Security & Side-Channel Protection</h2>
+        <div class="item" onclick="show('sca')"><div class="badge">SC</div><div><div class="title">Side-channel resilience</div><div class="small">Reduce info leaks via timing, power, EM.</div></div><div class="toggle">▶</div></div>
+        <div class="item" onclick="show('mask')"><div class="badge">RM</div><div><div class="title">Randomized masked arithmetic</div><div class="small">Hide secrets by mixing random masks during ops.</div></div><div class="toggle">▶</div></div>
+        <div class="item" onclick="show('ct')"><div class="badge">CT</div><div><div class="title">Deterministic constant-time primitives</div><div class="small">Make execution time independent of secrets.</div></div><div class="toggle">▶</div></div>
+        <div class="item" onclick="show('jitter')"><div class="badge">SJ</div><div><div class="title">Stochastic jitter injection</div><div class="small">Add randomness to timing to break attacks.</div></div><div class="toggle">▶</div></div>
+        <div class="item" onclick="show('shield')"><div class="badge">LS</div><div><div class="title">Layout-aware shielding</div><div class="small">Physical layout adjustments to reduce leakage.</div></div><div class="toggle">▶</div></div>
+        <div class="item" onclick="show('pq')"><div class="badge">PQ</div><div><div class="title">Post-quantum probing</div><div class="small">Defenses against future quantum-capable probes.</div></div><div class="toggle">▶</div></div>
+        <div class="item" onclick="show('fi')"><div class="badge">FI</div><div><div class="title">Fault-injection vectors</div><div class="small">Know the ways adversaries can fault devices and protect.</div></div><div class="toggle">▶</div></div>
+      </div>
+
+      <div class="section" id="sec-5">
+        <h2>5. Execution & Microcode</h2>
+        <div class="item" onclick="show('pipeline')"><div class="badge">EX</div><div><div class="title">Execution pipeline</div><div class="small">Stages: fetch, decode, execute, writeback.</div></div><div class="toggle">▶</div></div>
+        <div class="item" onclick="show('micro-rec')"><div class="badge">MU</div><div><div class="title">Recursive microcode & self-mutating microcode</div><div class="small">Microcode that can call or alter other microcode safely.</div></div><div class="toggle">▶</div></div>
+        <div class="item" onclick="show('recompose')"><div class="badge">MOP</div><div><div class="title">Micro-op recomposition</div><div class="small">Rewriting micro-ops to match pipeline / energy needs.</div></div><div class="toggle">▶</div></div>
+        <div class="item" onclick="show('rollback')"><div class="badge">RB</div><div><div class="title">Guarded rollback checkpoints</div><div class="small">Savepoints for safe rollback on fault.</div></div><div class="toggle">▶</div></div>
+      </div>
+
+      <div class="section" id="sec-6">
+        <h2>6. Neuromorphic / AI Compute</h2>
+        <div class="item" onclick="show('syn')"><div class="badge">NN</div><div><div class="title">Synaptic-density compute plane</div><div class="small">High local connectivity for synapse-like weights.</div></div><div class="toggle">▶</div></div>
+        <div class="item" onclick="show('memr')"><div class="badge">MEM</div><div><div class="title">Memristive emulation layers</div><div class="small">Analog-style memory to emulate synapses.</div></div><div class="toggle">▶</div></div>
+        <div class="item" onclick="show('hdwm')"><div class="badge">WM</div><div><div class="title">High-density weight matrices</div><div class="small">Packing many weights efficiently on chip.</div></div><div class="toggle">▶</div></div>
+        <div class="item" onclick="show('adi')"><div class="badge">ADI</div><div><div class="title">Analog-to-digital isolation</div><div class="small">Keep analog compute isolated to reduce noise coupling.</div></div><div class="toggle">▶</div></div>
+      </div>
+
+      <div class="section" id="sec-7">
+        <h2>7. Reliability, Power & Thermal Management</h2>
+        <div class="item" onclick="show('leak')"><div class="badge">LK</div><div><div class="title">Leakage minimization</div><div class="small">Design choices to lower idle power drain.</div></div><div class="toggle">▶</div></div>
+        <div class="item" onclick="show('substrate')"><div class="badge">SC</div><div><div class="title">Substrate coupling</div><div class="small">How signals couple through the silicon substrate.</div></div><div class="toggle">▶</div></div>
+        <div class="item" onclick="show('therm')"><div class="badge">TB</div><div><div class="title">Thermodynamic budgets</div><div class="small">Plan heat budgets for worst-case usage.</div></div><div class="toggle">▶</div></div>
+        <div class="item" onclick="show('em')"><div class="badge">EM</div><div><div class="title">Electromigration budgets</div><div class="small">Limit current density to prevent metal migration.</div></div><div class="toggle">▶</div></div>
+      </div>
+
+      <div class="section" id="sec-8">
+        <h2>8. Design Philosophy & Toolchain</h2>
+        <div class="item" onclick="show('det')"><div class="badge">SD</div><div><div class="title">Silicon-level determinism</div><div class="small">Pushing for predictable behaviour down to silicon.</div></div><div class="toggle">▶</div></div>
+        <div class="item" onclick="show('harden')"><div class="badge">HT</div><div><div class="title">Hardened toolchain</div><div class="small">Tooling that resists accidental or malicious changes.</div></div><div class="toggle">▶</div></div>
+        <div class="item" onclick="show('prag')"><div class="badge">LT</div><div><div class="title">Low-level toolchain pragmatics</div><div class="small">Small practical choices that save time in silicon flow.</div></div><div class="toggle">▶</div></div>
+        <div class="item" onclick="show('spec')"><div class="badge">SP</div><div><div class="title">Spec pushed to silicon</div><div class="small">When the spec is enforced by hardware design choices.</div></div><div class="toggle">▶</div></div>
+      </div>
+
+    </div>
+
+    <div class="panel right">
+      <input class="search" id="search" placeholder="Search a concept (e.g., 'wear', 'mask')" oninput="doSearch()" />
+
+      <div class="section">
+        <h2 id="panel-title">Select a concept</h2>
+        <div id="panel-body" class="card-body">Click any item on the left to see a short explanation, diagram, code snippet, and a tiny quiz.</div>
+      
+      </div>
+
+      <div class="section">
+        <h2>Download</h2>
+        <div class="small">Export this page as a single HTML file for offline use.</div>
+        <div class="controls">
+          <button class="btn" onclick="downloadHTML()">Download HTML</button>
+          <button class="btn" onclick="print()">Print</button>
+        </div>
+      </div>
+
+      <div class="footer">Made as a learning aid — use as a starting point. Hover over code blocks to copy.</div>
+      <div style="text-align:center;" class="footer">Made by <strong>rayofgoldenlight</strong></div>
+    </div>
+  </div>
+</div>
+
+<script>
+function shuffleQuiz(quiz) {
+  const a = quiz.a.slice(); // copy answers
+  let correctAnswer = quiz.correct;
+
+  // Fisher-Yates shuffle
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+
+    // Update correct index if it was swapped
+    if (i === correctAnswer) correctAnswer = j;
+    else if (j === correctAnswer) correctAnswer = i;
+  }
+
+  return { a, correct: correctAnswer };
+}
+
+const library = {
+  'bare-metal':{
+    title:'Bare-metal',
+    analogy:'Like driving a race car with no autopilot — you control every pedal and gear.',
+    diagram:'Simple block: CPU → Memory → Peripherals (no OS layer).',
+    code:`// C: Blink LED without OS\nvolatile unsigned int *GPIO = (unsigned int*)0x40020014;\nint main(){ while(1){ *GPIO = 1; for(volatile int i=0;i<100000;i++); *GPIO=0; for(volatile int i=0;i<100000;i++);} }`,
+    quiz:{q:'Which is a risk when running bare-metal?', a:['No memory isolation','Simpler timing','Automatic resource management'], correct:0}
+  },
+  'net5':{title:'Net5-timed fabric',analogy:'Think of a city grid with roads that guarantee travel time between neighborhoods.',diagram:'Timing islands connected by nets with deterministic arrival windows.',code:`// Pseudo: scheduling deterministic delivery\n// "net5" guarantees packet delivery in 5 cycles\nfunction sendOnNet5(pkt){ waitCycles(5); enqueue(pkt); }`,quiz:{q:'What does deterministic timing give you?',a:['Predictability','Lower area','Unlimited bandwidth'],correct:0}},
+  'runtime':{title:'Runtime',analogy:'Middleware librarian deciding which book (resource) goes where.',diagram:'Stack: HW → HAL → Runtime → Apps',code:'// Example: minimal runtime vs none\n// With runtime: thread scheduling, syscalls\n// Without: main() runs directly on hardware',quiz:{q:'A system without runtime usually means:',a:['More direct control','Automatic memory safety','Garbage collection'],correct:0}},
+  'hal':{title:'HAL',analogy:'Translator between many languages: driver code and silicon speak different dialects.',diagram:'Driver → HAL → Device',code:'// C: HAL wrapper\nint hal_write_reg(addr, val){ // common API to access different devices }',quiz:{q:'Main benefit of HAL?',a:['Decoupling drivers from hardware','Speed up CPU','Make silicon larger'],correct:0}},
+  'clock':{title:'Clock domain isolation',analogy:'Different time zones in a distributed team — you need safe handoffs.',diagram:'ClockA --- synchronizer --- ClockB',code:`// Pseudo: two-flip-flop synchronizer\nreg sync1, sync2; always @(posedge clkB) begin sync1 <= signalFromA; sync2 <= sync1; end`,quiz:{q:'Why use synchronizers?',a:['Avoid metastability','Increase frequency','Reduce area'],correct:0}},
+  'gate':{title:'Gate-level timing closure',analogy:'Final dress rehearsal where you check if every step fits into the music.',diagram:'Synthesis → Place & Route → Timing analysis',code:'// Not code — gate-level timing uses STA tools',quiz:{q:'Timing closure ensures:',a:['All paths meet timing constraints','Lower power','Feature parity'],correct:0}},
+  'tsv':{title:'TSV-aware routing',analogy:'Elevators in a skyscraper: vertical connections affect capacity and layout.',diagram:'2.5D/3D chip stacks with TSVs',code:'// Constraint hint: Avoid vias in tight timing nets',quiz:{q:'TSVs can introduce:',a:['Extra capacitance and mechanical stress','Faster clocks','Unlimited IO'],correct:0}},
+  'lowk':{title:'Low-k routing',analogy:'Switching from crowded highways to low-friction lanes to move faster.',diagram:'Lower dielectric constant reduces capacitance',code:'// Manufacturing note: use low-k materials for middle layers',quiz:{q:'Low-k materials primarily reduce:',a:['Capacitance','Supply voltage','Yield'],correct:0}},
+  'dbb':{title:'Dynamic body-biasing',analogy:'Temporarily giving the engine more fuel at uphill and less downhill to save fuel.',diagram:'Body bias circuit toggles to speed up or slow down transistors',code:'// Control code toggles bias depending on workload',quiz:{q:'DBB trades off:',a:['Speed vs leakage','Area vs frequency','ECC vs wear'],correct:0}},
+  'pwr':{title:'Fine-grained power gating',analogy:'Turning off rooms in a house when not used instead of the whole house.',diagram:'Power switches gating small blocks',code:'// Power domain off sequence: flush state -> cut power -> isolation',quiz:{q:'Fine-grained gating reduces:',a:['Idle power','Design complexity','Clock skew'],correct:0}},
+
+  'arb':{title:'Peer-to-peer bus arbitration',analogy:'Two people politely taking turns speaking at a single microphone.',diagram:'Bus with arbiter giving grant signals',code:'// Round-robin arbiter pseudo',quiz:{q:'Goal of arbitration?',a:['Fair access to shared bus','Faster clocks','Lower leakage'],correct:0}},
+  'mesh':{title:'Distributed request-grant mesh',analogy:'Neighborhood mail exchange where each node forwards requests locally.',diagram:'Mesh of routers with local buffers',code:'// Simple credit-based flow control pseudocode',quiz:{q:'Distributed mesh advantage?',a:['Scalability','Simplicity','Zero latency'],correct:0}},
+  'gray':{title:'Gray-coded token passing',analogy:'Passing a baton labelled so only one bit changes between neighbors.',diagram:'Token ring with Gray code labels',code:'// Gray code next: g = n ^ (n >> 1)',quiz:{q:'Gray encoding reduces:',a:['Transition count on token edges','Area','Voltage'],correct:0}},
+  'cross':{title:'Cross-bridge interconnects',analogy:'Bridges connecting separate islands for cars or trains.',diagram:'Crossbar/bridge between different buses',code:'// Bridge handles translations & buffering',quiz:{q:'Cross-bridge handles?',a:['Protocol translation','Power sequencing','Metastability'],correct:0}},
+
+  'fsm':{title:'State-machine fallback',analogy:'Fail-safe mode in elevators going to ground floor on error.',diagram:'State machine with normal vs fallback state',code:`// Example FSM fallback\nstate NORMAL, ERROR_FALLBACK; on error -> goto ERROR_FALLBACK;`,quiz:{q:'Fallback FSM ensures:',a:['Predictable safe state','Highest performance','Dynamic reconfiguration'],correct:0}},
+  'txn':{title:'Transactional integrity',analogy:'Bank transaction either fully completes or is rolled back.',diagram:'Begin -> operations -> commit/rollback',code:'// Pseudo: begin txn; write; if error rollback; else commit;',quiz:{q:'Transactional guarantees prevent:',a:['Partial updates causing inconsistency','Clock drift','TSV failures'],correct:0}},
+  'nvreg':{title:'NV register persistence',analogy:'Sticky notes that survive reboots.',diagram:'Register with NVM backing store',code:'// Save critical reg to NVM on config change',quiz:{q:'NV registers are useful for:',a:['Boot config persistence','Faster clocks','Analog compute'],correct:0}},
+  'persist':{title:'Persistent state',analogy:'A notebook you keep between sessions.',diagram:'State sink -> non-volatile storage',code:'// Commit state to NVM atomically',quiz:{q:'Persistent state must survive:',a:['Power loss and resets','Process scheduling','Cache misses'],correct:0}},
+  'ecc':{title:'Multi-tier ECC',analogy:'Multiple layers of proofreading (spell-check, grammar, editor).',diagram:'L1 parity, L2 SECDED, L3 stronger',code:'// Example: level-based ECC checks on read',quiz:{q:'Multi-tier ECC optimizes:',a:['Cost vs protection','Latency vs area','Voltage vs temperature'],correct:0}},
+  'wear':{title:'Wear-leveling controllers',analogy:'Rotating seats so everyone experiences equal wear.',diagram:'Logical-to-physical mapping layer',code:'// Map logical block -> least-used physical block',quiz:{q:'Wear-leveling goal?',a:['Extend lifetime of NVM','Improve speed','Lower leakage'],correct:0}},
+  'journal':{title:'Atomic journaling',analogy:'Write a shopping list before changing a recipe — so you can revert if needed.',diagram:'Append-only journal -> commit -> apply',code:'// Write intent record, flush, then apply',quiz:{q:'Journaling helps with:',a:['Crash-safe updates','Lower power','TSV routing'],correct:0}},
+  'eeprom':{title:'EEPROM & FRAM windows',analogy:'Small fast notebooks for quick notes.',diagram:'Small NVM windows in address space',code:'// Use FRAM for frequent small updates',quiz:{q:'FRAM advantage over EEPROM?',a:['Higher write endurance','Lower cost','Larger size'],correct:0}},
+  'resets':{title:'Resets & Brownouts',analogy:'Phone safe restart sequences when battery drops.',diagram:'Brownout detector -> controlled reset',code:'// Brownout: save state quickly -> reset',quiz:{q:'Brownout handling should:',a:['Safely preserve critical state','Increase frequency','Bypass ECC'],correct:0}},
+
+  'sca':{title:'Side-channel resilience',analogy:'Speaking in a whisper in a noisy room to hide what you say.',diagram:'Power traces masked; EM shielding',code:'// Hard to code — apply masked crypto primitives',quiz:{q:'Side-channel protection reduces:',a:['Leak of secrets through power/time/EM','Die size','TSV count'],correct:0}},
+  'mask':{title:'Randomized masked arithmetic',analogy:'Mixing a secret with random sugar so it&apos;s hidden.',diagram:'value = (secret ^ mask); operate; unmask',code:'// Example: masked add pseudocode',quiz:{q:'Masking protects against:',a:['Differential power analysis','Thermal issues','Wear leveling'],correct:0}},
+  'ct':{title:'Constant-time primitives',analogy:'Cooking a dish for fixed time regardless of ingredients.',diagram:'All branches padded to same time',code:'// Constant-time comparison\nint ct_cmp(a,b){ res=0; for(i) res |= a[i]^b[i]; return res==0; }',quiz:{q:'Constant-time prevents:',a:['Timing attacks','Voltage spikes','ECC failures'],correct:0}},
+  'jitter':{title:'Stochastic jitter injection',analogy:'A musician improvising slight tempo changes to confuse a listener.',diagram:'Timing jitter added to operations',code:'// Add random small delays to crypto ops',quiz:{q:'Jitter helps to:',a:['Reduce correlation for attacks','Improve deterministic timing','Lower leakage'],correct:0}},
+  'shield':{title:'Layout-aware shielding',analogy:'Putting a fence around a garden to block wind and noise.',diagram:'Metal shield layers around sensitive traces',code:'// Layout rule: shield critical net with guard ring',quiz:{q:'Layout shielding reduces:',a:['EM leakage','ECC errors','Thermal budgets'],correct:0}},
+  'pq':{title:'Post-quantum probing',analogy:'Designing locks that even future tools can&apos;t pick easily.',diagram:'Algorithms & hardware considered for PQ resilience',code:'// Use PQ-safe algorithms in firmware',quiz:{q:'Post-quantum readiness focuses on:',a:['Algorithmic resilience','Reducing TSVs','Lower-k materials'],correct:0}},
+  'fi':{title:'Fault-injection vectors',analogy:'Knowing where a burglar might break in so you can reinforce it.',diagram:'Fault sources: voltage glitch, clock glitch, EMI',code:'// Test harness intentionally injects faults',quiz:{q:'Understanding FI vectors helps to:',a:['Harden systems proactively','Lower cost','Increase substrate coupling'],correct:0}},
+
+  'pipeline':{title:'Execution pipeline',analogy:'An assembly line splitting work into stages.',diagram:'Fetch -> Decode -> Exec -> Mem -> WB',code:'// Simple 5-stage pipeline diagram pseudocode',quiz:{q:'Pipelines improve:',a:['Throughput','Single-instruction latency','ECC strength'],correct:0}},
+  'micro-rec':{title:'Recursive & Self-mutating microcode',analogy:'A recipe that can modify its own steps depending on context.',diagram:'Microcode calls microcode or rewrites safe regions',code:'// Very controlled: microcode patching with signatures',quiz:{q:'Self-mutating microcode requires:',a:['Strong verification','Lower area','Wear-leveling'],correct:0}},
+  'recompose':{title:'Micro-op recomposition',analogy:'Combining small steps into larger ones to save time.',diagram:'Micro-op cache -> recomposition unit',code:'// Recompose micro-ops to reduce pipeline stalls',quiz:{q:'Recomposition helps:',a:['Lower instruction overhead','Increase TSVs','Reduce FRAM writes'],correct:0}},
+  'rollback':{title:'Guarded rollback checkpoints',analogy:'Save points in a video game.',diagram:'Checkpoint -> speculative execution -> commit or rollback',code:'// Save architectural state before risky op',quiz:{q:'Rollback checkpoints are for:',a:['Recovering from mis-speculation or faults','Faster clocks','Lower leakage'],correct:0}},
+
+  'syn':{title:'Synaptic-density compute plane',analogy:'A city with many local roads between houses enabling short routes.',diagram:'Dense interconnects near compute nodes',code:'// Architectures emphasize locality for weights',quiz:{q:'High synaptic density reduces:',a:['Communication cost for local ops','Die area','ECC needs'],correct:0}},
+  'memr':{title:'Memristive emulation layers',analogy:'Old-school analog pots used to remember settings.',diagram:'Analog memristor crossbar used for multiply-accumulate',code:'// Device model: conductance stores weight',quiz:{q:'Memristors are primarily interesting for:',a:['High-density analog weights','Lower voltage','Higher area'],correct:0}},
+  'hdwm':{title:'High-density weight matrices',analogy:'Packing more books per shelf in a library.',diagram:'Tiled dense weight storage with local compute',code:'// Tiling + compression for dense matrices',quiz:{q:'Density optimizes for:',a:['Throughput & area','Lower leakage','Clock domains'],correct:0}},
+  'adi':{title:'Analog-to-digital isolation',analogy:'Keeping quiet rooms away from noisy factories.',diagram:'Isolation layers & shielding between analog/digital',code:'// Careful floorplanning and isolation cells',quiz:{q:'Isolation reduces:',a:['Cross-talk and noise','ECC errors','Thermodynamic budgets'],correct:0}},
+
+  'leak':{title:'Leakage minimization',analogy:'Seal the windows at night to stop drafts.',diagram:'Use high-Vt, power gating, and DBB',code:'// Compiler & design knobs reduce leakage',quiz:{q:'Leakage minimization often trades off:',a:['Performance vs power','ECC vs wear','Area vs TSVs'],correct:0}},
+  'substrate':{title:'Substrate coupling',analogy:'Sound traveling through the floor between apartments.',diagram:'Noisy switching couples into sensitive analog nets',code:'// Guard rings and isolation to mitigate',quiz:{q:'Substrate coupling mitigation includes:',a:['Guard rings and careful placement','Lower voltage','Increased wear'],correct:0}},
+  'therm':{title:'Thermodynamic budgets',analogy:'How much heating your oven can tolerate before damage.',diagram:'Budget per region -> throttling policies',code:'// Scheduler monitors temp sensors and throttles',quiz:{q:'Thermal budgets guide:',a:['Peak power management','FRAM writes','ECC tiering'],correct:0}},
+  'em':{title:'Electromigration budgets',analogy:'Not exceeding maximum traffic on a narrow bridge for longevity.',diagram:'Track max current densities per metal layer',code:'// Route wide enough traces or limit current density',quiz:{q:'Electromigration considerations limit:',a:['Current density','Area','Latency'],correct:0}},
+
+  'det':{title:'Silicon-level determinism',analogy:'Designing the robot to always behave the same for the same inputs.',diagram:'Spec -> RTL -> gate -> silicon with formal checks',code:'// Formal assertions and property checking',quiz:{q:'Determinism is important for:',a:['Safety-critical systems','Faster clocks','Lower leakage'],correct:0}},
+  'harden':{title:'Hardened toolchain',analogy:'A locked workshop only accessible by authorized engineers.',diagram:'Signed tool releases & reproducible builds',code:'// Reproducible builds and supply-chain checks',quiz:{q:'A hardened toolchain reduces risk of:',a:['Toolchain tampering','Lower area','ECC errors'],correct:0}},
+  'prag':{title:'Low-level toolchain pragmatics',analogy:'Use small scripts to automate repetitive layout checks.',diagram:'Scripts + flows saving engineer time',code:'// Small automation snippets for DRC/LVS checks',quiz:{q:'Pragmatic tools improve:',a:['Flow efficiency','TSV counts','Wear leveling'],correct:0}},
+  'spec':{title:'Spec pushed to silicon',analogy:'Making hardware enforce business rules (e.g., a locked door).',diagram:'Spec in hardware reduces ambiguity',code:'// When possible, enforce invariants in silicon',quiz:{q:'Pushing spec to silicon yields:',a:['Performance and predictability','Larger software teams','Lower yield'],correct:0}}
+};
+
+function show(key) {
+  const entry = library[key];
+
+  // Shuffle answers for this quiz
+  const shuffled = shuffleQuiz(entry.quiz);
+
+  // Use shuffled answers when generating HTML
+  const body = document.getElementById('panel-body');
+  const title = document.getElementById('panel-title');
+  title.textContent = entry.title;
+
+  body.innerHTML = `
+    <div class="kv"><div class="term">Analogy:</div><div class="small">${entry.analogy}</div></div>
+    <div class="kv" style="margin-top:10px"><div class="term">Diagram:</div><div class="small">${entry.diagram}</div></div>
+    <div style="margin-top:10px"><div class="term">Code example:</div><pre class="code">${escapeHtml(entry.code)}</pre></div>
+    <div class="quiz"><div class="term" style="margin-top:10px">Quick quiz:</div>
+      <div class="small" style="margin-top:6px">${entry.quiz.q}</div>
+      <div style="display:flex;gap:8px;margin-top:8px">
+        ${shuffled.a.map((opt,i)=>`<button class="btn" onclick="answer('${key}',${i})">${opt}</button>`).join('')}
+      </div>
+      <div id="quiz-res" style="margin-top:8px"></div>
+    </div>
+  `;
+
+  // Update the quiz object with shuffled answers so answer() works
+  entry.quiz.a = shuffled.a;
+  entry.quiz.correct = shuffled.correct;
+
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function escapeHtml(str){ return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function keyToId(k){ return JSON.stringify(k); }
+
+function answer(key, id) {
+  const e = library[key];
+  const r = document.getElementById('quiz-res');
+  if (id === e.quiz.correct) {
+    r.innerHTML = '<div class="correct">Correct! — ' + e.quiz.a[id] + '</div>';
+  } else {
+    r.innerHTML =
+      '<div class="wrong">Not quite — correct is: ' + e.quiz.a[e.quiz.correct] + '</div>';
+  }
+}
+function downloadHTML(){
+  const doc = `<!doctype html>\n${document.documentElement.outerHTML}`;
+  const blob = new Blob([doc], {type: 'text/html'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href=url; a.download='low-level-systems-explainer.html'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+}
+
+function doSearch(){
+  const q = document.getElementById('search').value.toLowerCase();
+  if(!q) return;
+  for(const k in library){
+    if(k.includes(q) || library[k].title.toLowerCase().includes(q) || library[k].analogy.toLowerCase().includes(q)){
+      show(k); return;
+    }
+  }
+  document.getElementById('panel-title').textContent='No match';
+  document.getElementById('panel-body').textContent='Try different keywords e.g. "wear", "mask", "clock".'
+}
+
+// small UX: keyboard shortcuts
+window.addEventListener('keydown', (e)=>{
+  if(e.key==='/' && document.activeElement!==document.getElementById('search')){ e.preventDefault(); document.getElementById('search').focus(); }
+});
+</script>
+</body>
+</html>

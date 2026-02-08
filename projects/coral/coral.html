@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Coral | Copay Autofiller</title>
+  <link rel="icon" type="image/x-icon" href="https://i.postimg.cc/WpBMQmVy/gl-ll.png">
+  <style>
+    /* Global Styles */
+    :root {
+      --coral: #FF6F61;
+      --teal: #008080;
+      --light-bg: #f9fafb;
+      --text-dark: #1e1e1e;
+      --text-muted: #555;
+    }
+    body {
+      font-family: "Segoe UI", Helvetica, sans-serif;
+      background-color: var(--light-bg);
+      color: var(--text-dark);
+      margin: 0;
+      line-height: 1.6;
+    }
+
+    header {
+      background: white;
+      padding: 1.2rem 2rem;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    header h1 {
+      margin: 0;
+      font-size: 2.1rem;
+      color: var(--teal);
+    }
+
+    /* Hero Section */
+    .hero {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 80vh;
+      padding: 1rem;
+      background: linear-gradient(135deg, #ffffff 30%, #e9f8f6 100%);
+      text-align: center;
+    }
+    .hero h2 {
+      font-size: 1.7rem;
+      max-width: 700px;
+      color: var(--teal);
+      margin-bottom: 1rem;
+    }
+    .hero p {
+      color: var(--text-muted);
+      max-width: 600px;
+      margin: 0 auto 2rem auto;
+    }
+    .hero button {
+      background-color: var(--coral);
+      border: none;
+      color: white;
+      padding: 1rem 2rem;
+      border-radius: 6px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+    .hero button:hover {
+      background-color: #ff5648;
+    }
+
+    /* Demo Modal */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.6);
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-content {
+      background: #fff;
+      padding: 1.5rem;
+      border-radius: 8px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+      max-width: 800px;
+      width: 90%;
+      text-align: center;
+      position: relative;
+    }
+    .modal-content img {
+      width: 100%;
+      border-radius: 6px;
+    }
+    .close-btn {
+      position: absolute;
+      top: 10px; right: 10px;
+      border: none;
+      background: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+    }
+
+    /* Capabilities Section */
+    .features {
+      background: white;
+      padding: 3rem 1.5rem;
+    }
+    .features h3 {
+      text-align: center;
+      color: var(--teal);
+      margin-bottom: 2rem;
+      font-size: 1.8rem;
+    }
+    .accordion {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    .accordion-item {
+      background: #fefefe;
+      border-radius: 6px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+      margin-bottom: 1rem;
+      overflow: hidden;
+    }
+    .accordion-title {
+      padding: 1rem 1.5rem;
+      cursor: pointer;
+      background: var(--light-bg);
+      color: var(--text-dark);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: 600;
+      border-left: 4px solid transparent;
+      transition: 0.3s ease;
+    }
+    .accordion-title:hover {
+      border-left-color: var(--coral);
+      background: #f2f7f6;
+    }
+    .accordion-content {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.4s ease, padding 0.4s ease;
+      padding: 0 1.5rem;
+      background: white;
+    }
+    .accordion-content.open {
+      padding: 1rem 1.5rem;
+    }
+    footer {
+      background: var(--teal);
+      color: white;
+      text-align: center;
+      padding: 1.5rem;
+      font-size: 0.9rem;
+    }
+      .gif-container {
+    max-width: 720px;
+    width: 90%;
+    background: white;
+    border-radius: 4px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    overflow: hidden;
+  }
+  .gif-container img {
+    width: 100%;
+    display: block;
+  }
+
+    @media (max-width: 700px) {
+      .hero h2 {
+        font-size: 1.8rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Coral - <i> A Smart Copay-Form Autofiller</i></h1>
+  </header>
+
+  <section class="hero">
+    <h2><u>Making patient-assistance easier</u></h2>
+    <div class="gif-container">
+    <img src="demo.gif" alt="Coral Form Filler Demo"
+      onerror="this.src='https://i.postimg.cc/76FhX73w/2025-11-11-12-09-06.gif'">
+  </div>
+    <p>
+      <br>
+        Coral is built to run on a local LLM, ensuring that all <u>patient 
+        data stays completely private</u>. It’s designed to <u>make patient assistance practitioners’ 
+        jobs easier</u> by automatically filling forms efficiently and securely.
+      </p>
+  </section>
+
+  <div class="modal" id="demo-modal">
+    <div class="modal-content">
+      <button class="close-btn" id="close-demo">&times;</button>
+      <!-- Replace below src with your GIF -->
+      <img src="demo.gif" alt="Coral Form Filler Demo">
+      <p style="margin-top:1rem;color:#666;">Coral in action: AI dynamically analyzing and completing enrollment forms in real-time.</p>
+    </div>
+  </div>
+
+  <footer>
+    &copy; Made by <b>rayofgoldenlight</b> and <i>SlicVic</i> at ▒ Tachbot
+  </footer>
+
+  <script>
+    // Open/close modal
+    const viewDemo = document.getElementById('view-demo');
+    const modal = document.getElementById('demo-modal');
+    const closeDemo = document.getElementById('close-demo');
+
+    viewDemo.addEventListener('click', () => modal.style.display = 'flex');
+    closeDemo.addEventListener('click', () => modal.style.display = 'none');
+    window.addEventListener('click', e => { if(e.target === modal) modal.style.display = 'none'; });
+
+    // Accordion functionality
+    const items = document.querySelectorAll(".accordion-item");
+    items.forEach(item => {
+      const title = item.querySelector(".accordion-title");
+      const content = item.querySelector(".accordion-content");
+
+      title.addEventListener("click", () => {
+        const openItem = document.querySelector(".accordion-content.open");
+        if (openItem && openItem !== content) {
+          openItem.classList.remove("open");
+          openItem.style.maxHeight = 0;
+        }
+
+        content.classList.toggle("open");
+        content.style.maxHeight = content.classList.contains("open")
+          ? content.scrollHeight + "px"
+          : 0;
+      });
+    });
+  </script>
+
+</body>
+</html>

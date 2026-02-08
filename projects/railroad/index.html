@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Project: Jirgin</title>
+<link rel="icon" type="image/x-icon" href="https://i.postimg.cc/WpBMQmVy/gl-ll.png">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+:root{
+  --pink:#ff4fa3;
+  --pink2:#ff9cc9;
+  --black:#050507;
+  --panel:#111116;
+}
+
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  background:#050507;
+  color:#ffd6ec;
+  font-family:'Press Start 2P', monospace;
+  overflow-x:hidden;
+}
+
+#bg {
+  position:fixed;
+  inset:0;
+  z-index:0;
+}
+
+.content {
+  position:relative;
+  z-index:1;
+  max-width:980px;
+  margin:auto;
+  padding:40px 18px 60px;
+}
+
+.pixel-box{
+  background:var(--panel);
+  border:3px solid var(--pink);
+  padding:22px;
+  margin:22px 0;
+  box-shadow:
+    0 0 0 3px #000 inset,
+    0 0 18px rgba(255,79,163,.25);
+}
+
+h1{
+  font-size:28px;
+  color:var(--pink);
+  text-align:center;
+  margin:10px 0 18px;
+}
+
+h2{
+  font-size:16px;
+  color:var(--pink2);
+  margin:0 0 16px;
+}
+
+p{
+  font-size:12px;
+  line-height:1.6;
+  color:#ffc2e3;
+}
+
+.grid{
+  display:grid;
+  grid-template-columns: repeat(auto-fit,minmax(260px,1fr));
+  gap:16px;
+}
+
+.feature{
+  background:#0c0c12;
+  border:2px solid #2a2a35;
+  padding:14px;
+  font-size:11px;
+}
+
+.badge{
+  display:inline-block;
+  border:2px solid var(--pink);
+  padding:6px 10px;
+  margin:6px 6px 0 0;
+  font-size:10px;
+  color:var(--pink2);
+}
+
+.button{
+  display:inline-block;
+  margin-top:14px;
+  padding:14px 18px;
+  font-size:12px;
+  text-decoration:none;
+  color:black;
+  background:var(--pink);
+  border:3px solid #000;
+  box-shadow:4px 4px 0 #000;
+}
+
+.button:hover{
+  transform:translate(2px,2px);
+  box-shadow:2px 2px 0 #000;
+}
+
+.footer{
+  text-align:center;
+  font-size:11px;
+  color:#ff9cc9;
+  margin-top:30px;
+}
+</style>
+</head>
+
+<body>
+
+<canvas id="bg"></canvas>
+
+<div class="content">
+
+  <h1>Railroad</h1>
+  <h1>An Encrypted-Group-Task Manager</h1>
+
+  <div class="pixel-box">
+    <h2>ABOUT</h2>
+    <p>
+      A simple task system manager,
+      in order to track what is being done and is left to be done. 
+      Encrypted to allow people to publicly share keys to friends. 
+      Only those that know the password can access the encrypted tasks. 
+      Built for figuring out what's going on and privacy.
+    </p>
+  </div>
+
+  <div class="pixel-box">
+    <h2>FEATURES</h2>
+
+    <div class="grid">
+      <div class="feature">Use F2 on login page to demo</div>
+      <div class="feature">Can assign task + subtask to people</div>
+      <div class="feature">Can override previous assignments</div>
+      <div class="feature">Visual merge diff preview</div>
+      <div class="feature">Use F3 on merge page to test merge</div>
+      <div class="feature">Works offline</div>
+    </div>
+
+    <div style="margin-top:12px">
+      <span class="badge">UNDER 10MB</span>
+      <span class="badge">FRIENDS</span>
+      <span class="badge">ENCRYPTED EXPORT</span>
+      <span class="badge">MERGE ENGINE</span>
+      <span class="badge">LUA</span>
+    </div>
+  </div>
+
+  <div class="pixel-box">
+    <h2>DOWNLOAD</h2>
+    <p>Executable build + source code (Download the DLLs with the EXE):</p>
+
+    <a class="button"
+       href="https://github.com/rayofgoldenlight/rayofgoldenlight.github.io/tree/main/projects/railroad/exe"
+       target="_blank">
+       OPEN GITHUB
+    </a>
+  </div>
+
+  <div class="footer">
+    Made by <strong>rayofgoldenlight</strong>
+  </div>
+
+</div>
+
+<script>
+
+
+const canvas = document.getElementById("bg");
+const ctx = canvas.getContext("2d");
+
+let w,h;
+function resize(){
+  w = canvas.width = window.innerWidth;
+  h = canvas.height = window.innerHeight;
+}
+resize();
+window.addEventListener("resize", resize);
+
+/* particle pool */
+const COUNT = 220; // looks dense but still fast
+const particles = new Array(COUNT);
+
+for(let i=0;i<COUNT;i++){
+  particles[i] = {
+    x: Math.random()*w,
+    y: Math.random()*h,
+    r: Math.random()*2+1,
+    speed: 0.3 + Math.random()*0.6,
+    dir: Math.random()<0.5 ? 1 : -1, // left or right
+    phase: Math.random()*Math.PI*2,
+    amp: 10 + Math.random()*30
+  };
+}
+
+let t = 0;
+
+function frame(){
+  t += 0.016;
+
+  ctx.clearRect(0,0,w,h);
+
+  ctx.fillStyle = "#ff4fa3";
+
+  for(let i=0;i<COUNT;i++){
+    const p = particles[i];
+
+    /* horizontal motion */
+    p.x += p.speed * p.dir;
+
+    if(p.dir === 1 && p.x > w+5) p.x = -5;
+    if(p.dir === -1 && p.x < -5) p.x = w+5;
+
+    /* wave motion without heavy trig per particle */
+    const yWave = p.y + Math.sin(t + p.phase) * p.amp;
+
+    ctx.beginPath();
+    ctx.arc(p.x, yWave, p.r, 0, Math.PI*2);
+    ctx.fill();
+  }
+
+  requestAnimationFrame(frame);
+}
+
+frame();
+</script>
+
+</body>
+</html>
