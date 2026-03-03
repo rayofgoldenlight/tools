@@ -188,8 +188,6 @@ LRESULT CALLBACK InputEditProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam
                 return 0; // Prevent default UP arrow behavior
             }
         }
-        // Notice we REMOVED the Ctrl+A check from here. 
-        // We let the keydown pass through naturally so the control stays happy.
     } 
     else if (msg == WM_CHAR) {
         if (wParam == VK_RETURN) {
@@ -199,7 +197,7 @@ LRESULT CALLBACK InputEditProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam
             }
         } else if (wParam == 1) {
             // wParam 1 is the ASCII control character for Ctrl+A.
-            // Select all text here, then return 0 to eat the char and stop the beep!
+            // Select all text here, then return 0 to eat the char
             SendMessage(hwnd, EM_SETSEL, 0, -1);
             return 0;
         }
@@ -353,7 +351,7 @@ DWORD WINAPI receive_thread(LPVOID arg) {
         for (int i = 0; i < n; i++) {
             if (buf[i] == '\n') {
                 line_buf[line_len] = '\0';
-                ProcessPacket(line_buf); // Pass line to our new handler
+                ProcessPacket(line_buf); // Pass line to new handler
                 line_len = 0;
             } else if (buf[i] != '\r') {
                 if (line_len < sizeof(line_buf) - 1) {
@@ -513,7 +511,6 @@ LRESULT CALLBACK HelpWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) 
     switch (msg) {
         case WM_CTLCOLORSTATIC:
         case WM_CTLCOLOREDIT: {
-            // Color the text box with our theme colors!
             HDC hdc = (HDC)wParam;
             SetTextColor(hdc, text_color);
             SetBkColor(hdc, chat_bg);
@@ -573,14 +570,12 @@ void ShowHelpDialog(HWND parent) {
         "When connecting to a server, ensure you use the server's UDP Port for discovery, NOT the TCP Port.\r\n"
         "The Host UI will display the correct UDP port (which is usually the TCP Port + 1).";
 
-    // Create a Multi-line, Read-Only, vertically scrollable text box
     HWND hHelpEdit = CreateWindow("EDIT", helpText,
         WS_CHILD | WS_VISIBLE | WS_VSCROLL | WS_BORDER | ES_MULTILINE | ES_READONLY,
         15, 15, width - 45, height - 70, hHelpWnd, NULL, hInst, NULL);
     
     SendMessage(hHelpEdit, WM_SETFONT, (WPARAM)hFont, TRUE);
 
-    // Make it modal (disables clicks on the main window while open)
     EnableWindow(parent, FALSE);
 
     MSG msg;
@@ -588,11 +583,10 @@ void ShowHelpDialog(HWND parent) {
     while (hHelpWnd && GetMessage(&msg, NULL, 0, 0)) {
         if (msg.message == WM_HOTKEY) {
             if (msg.wParam == 2) { 
-                // If F3 is pressed again, close the dialog!
+                // If F3 is pressed again, close the dialog
                 DestroyWindow(hHelpWnd);
                 continue;
             } else if (msg.wParam == 1) {
-                // If F2 is pressed, we can toggle the theme even while Help is open!
                 isDarkMode = !isDarkMode;
                 SetTheme(parent);
                 SetClassLongPtr(hHelpWnd, GCLP_HBRBACKGROUND, (LONG_PTR)hBgBrush);
@@ -883,7 +877,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
             PAINTSTRUCT ps;
             HDC hdc = BeginPaint(hwnd, &ps);
 
-            // Create 2-pixel wide pen using our current accent color (Blue/Red)
+            // Create 2-pixel wide pen using current accent color (Blue/Red)
             HPEN hAccentPen = CreatePen(PS_SOLID, 2, accent_color);
             HPEN hOldPen = (HPEN)SelectObject(hdc, hAccentPen);
 
@@ -1033,7 +1027,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     WSADATA wsa;
     if (WSAStartup(MAKEWORD(2,2), &wsa) != 0) return 1;
 
-    // Launch our glorious GUI
+    // Launch GUI
     LaunchChatGUI(hInstance);
 
     // Clean up when the window is closed

@@ -200,7 +200,7 @@ func main() {
 	w := a.NewWindow("LocalChat Host")
 	w.Resize(fyne.NewSize(440, 400))
 
-	// Track our running server instance
+	// Track running server instance
 	var srv *server.Server
 
 	// --- Title ---
@@ -262,7 +262,7 @@ func main() {
 		}
 		
 		// If user typed a letter, or exceeded 4 characters, 
-		// overwrite the text box with our corrected string.
+		// overwrite the text box with corrected string.
 		if filtered != s {
 			pinEntry.SetText(filtered)
 		}
