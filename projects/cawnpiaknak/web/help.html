@@ -1,0 +1,496 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Engine Documentation</title>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{background:#0f1220;color:#eaeaea;font-family:sans-serif;padding:40px 20px;line-height:1.7;min-height:100vh}
+    #gc{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none}
+    .doc{max-width:800px;margin:0 auto;background:#161b2e;border:2px solid #f7d06b;border-radius:8px;padding:30px 40px;position:relative;z-index:1}
+    #gui{position:fixed;top:12px;left:12px;z-index:10;display:flex;align-items:center;gap:8px}
+    #score{color:#f7d06b;font:bold 15px monospace;background:#161b2eee;border:1px solid #f7d06b;padding:3px 10px;border-radius:4px;min-width:90px}
+    .gbtn{background:#1e2440;border:1px solid #f7d06b;color:#f7d06b;padding:3px 10px;border-radius:4px;cursor:pointer;font:bold 12px sans-serif;transition:background .15s,color .15s}
+    .gbtn:hover{background:#f7d06b;color:#000}
+    #shop{position:fixed;top:12px;right:12px;z-index:10;background:#161b2eee;border:2px solid #f7d06b;border-radius:8px;padding:10px 14px;width:210px;display:none;max-height:90vh;overflow-y:auto}
+    #shop h3{color:#f7d06b;font-size:13px;margin-bottom:8px;border-bottom:1px solid #2a2f45;padding-bottom:4px}
+    .urow{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;font-size:11px}
+    .uname{color:#eaeaea;max-width:100px}.ulv{color:#9aa4c7;font-family:monospace;font-size:10px}
+    .ubtn{background:#1e2440;border:1px solid #2a2f45;color:#f7d06b;padding:1px 6px;border-radius:3px;cursor:pointer;font-size:10px;transition:background .15s,color .15s}
+    .ubtn:hover:not(:disabled){background:#f7d06b;color:#000}
+    .ubtn:disabled{opacity:.3;cursor:default}
+    
+    .header-container { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #2a2f45; padding-bottom: 10px; margin-bottom: 15px; }
+    h1{color:#f7d06b; margin: 0; padding: 0;}
+    h2{color:#00ff88;margin-top:28px;margin-bottom:10px}
+    code{background:#0b0e18;color:#ff6b6b;padding:2px 6px;border-radius:4px;font:14px ui-monospace,monospace}
+    pre{background:#0b0e18;border:1px solid #2a2f45;padding:15px;border-radius:6px;overflow-x:auto;color:#eaeaea;margin:10px 0;font-size:14px}
+    ul{padding-left:20px;margin:8px 0}li{margin-bottom:6px}p{margin-bottom:10px}
+    kbd{background:#0b0e18;border:1px solid #2a2f45;padding:1px 5px;border-radius:3px;font:13px monospace;color:#f7d06b}
+    .hint{color:#9aa4c7;font-size:13px;font-style:italic}
+
+    /* Transition classes */
+    body, .doc, #gui span, #shop, #shop h3, .gbtn, pre, code, kbd, .ubtn, .header-container, h1, h2 {
+      transition: background-color 0.5s ease, color 0.5s ease, border-color 0.5s ease, box-shadow 0.5s ease;
+    }
+    .fade-section {
+      transition: opacity 0.3s ease;
+      opacity: 1;
+    }
+
+    /* Light "Future" Theme */
+    body.future-mode { background: #f0f2f5; color: #2a2f45; }
+    body.future-mode .doc { background: #ffffff; border-color: #d1a522; box-shadow: 0 10px 40px rgba(0,0,0,0.08); }
+    body.future-mode #gui span { background: #ffffffee; border-color: #d1a522; color: #2a2f45; }
+    body.future-mode #shop { background: #ffffffee; border-color: #d1a522; }
+    body.future-mode #shop h3 { color: #d1a522; border-bottom-color: #ddd; }
+    body.future-mode .uname { color: #2a2f45; }
+    body.future-mode .ulv { color: #6b7280; }
+    body.future-mode .header-container { border-bottom-color: #ddd; }
+    body.future-mode h1 { color: #d1a522; }
+    body.future-mode h2 { color: #009955; }
+    body.future-mode pre, body.future-mode code { background: #e4e7eb; color: #d93838; border-color: #ccc; }
+    body.future-mode kbd { background: #e4e7eb; border-color: #ccc; color: #d1a522; }
+    body.future-mode .hint { color: #6b7280; }
+
+    /* Footer styles */
+    .footer {
+      margin-top: 40px;
+      padding-top: 20px;
+      border-top: 1px solid #2a2f45;
+      text-align: center;
+      color: #9aa4c7;
+      transition: border-color 0.5s ease, color 0.5s ease;
+    }
+    .footer p { margin-bottom: 10px; }
+    .footer a {
+      color: #eaeaea;
+      display: inline-block;
+      transition: color 0.15s, transform 0.15s;
+    }
+    .footer a:hover {
+      color: #f7d06b;
+      transform: scale(1.1);
+    }
+    
+    /* Light mode transitions for footer */
+    body.future-mode .footer { border-top-color: #ddd; color: #6b7280; }
+    body.future-mode .footer a { color: #2a2f45; }
+    body.future-mode .footer a:hover { color: #d1a522; }
+  </style>
+</head>
+<body>
+
+<canvas id="gc"></canvas>
+
+<div id="gui">
+  <span id="score">Coins: 0</span>
+  <button class="gbtn" id="togBtn">Start Game</button>
+</div>
+
+<div id="shop">
+  <h3>Upgrades</h3>
+  <div id="shopList"></div>
+</div>
+
+<div class="doc">
+
+  <div class="header-container">
+    <h1 id="mainTitle">Engine Documentation</h1>
+    <button id="futureBtn" class="gbtn">The Future</button>
+  </div>
+
+  <div id="docContent" class="fade-section">
+    <p class="hint">Psst .o` try clicking "Start Game" in the top-left corner. Hover over the falling golden <strong style="color:#f7d06b">o</strong> characters in the margins to get coins!</p>
+
+    <h2>1. The Scripting Language</h2>
+    <p>The scripting language looks like <strong>Lua</strong>, but it is compiled down to a tiny custom bytecode. Here is what you need to know:</p>
+    <ul>
+      <li><strong>Top-level only:</strong> You may only write <code>var</code> declarations and <code>function update(dt) ... end</code> at the top level. No nested functions or classes.</li>
+      <li><strong>Numbers only:</strong> All variables are <code>f32</code> floats. There are no strings, tables, or arrays. The only place you use a string is <code>key_down("right")</code>.</li>
+      <li><strong>No local variables:</strong> Every <code>var</code> is global. Declare all your variables at the top of the script.</li>
+      <li><strong>No custom functions:</strong> Only <code>function update(dt)</code> is supported. You cannot define helper functions yet.</li>
+      <li><strong>Control flow:</strong> <code>if / elseif / else / end</code> and <code>while / do / end</code> work exactly like Lua.</li>
+      <li><strong>Operators:</strong> <code>+ - * /</code>, comparisons <code>== != &lt; &gt; &lt;= &gt;=</code>, and logic <code>and or not</code>.</li>
+      <li><strong>Comments:</strong> Use <code>-- this is a comment</code> (same as Lua).</li>
+    </ul>
+    <pre>
+var speed = 200
+var score = 0
+
+function update(dt)
+    if key_down("right") then
+        obj[0].x = obj[0].x + speed * dt
+    end
+
+    if score == 10 then
+        obj[1].visible = 0
+    end
+end</pre>
+
+    <h2>2. Shapes, Objects, and Animations</h2>
+    <p>Your game world is built from <strong>Shapes</strong> (the visuals) and <strong>Objects</strong> (the instances placed in the scene).</p>
+    <ul>
+      <li><strong>Create shapes</strong> in the Object Manager (Shapes tab): Circle, Rectangle, Text, or draw a vector shape freehand.</li>
+      <li><strong>Place objects</strong> in the Objects tab: pick a shape, set position, rotation, and scale.</li>
+      <li><strong>Animations</strong> are sequences of shapes played at a given FPS. Assign an animation to an object to override its static shape.</li>
+    </ul>
+    <p>In your script, you control objects by index:</p>
+    <ul>
+      <li><code>obj[0].x</code> / <code>obj[0].y</code> -- Position</li>
+      <li><code>obj[0].rotation</code> / <code>obj[0].scale</code> -- Transform</li>
+      <li><code>obj[0].visible</code> -- Show/hide (1 or 0)</li>
+      <li><code>obj[0].value</code> -- A number injected into Text shapes that contain <code>{}</code></li>
+      <li><code>obj[0].val1</code> through <code>obj[0].val4</code> -- Four custom slots per object (great for HP, timers, flags)</li>
+    </ul>
+    <p>Behaviors let you write per-shape logic using <code>self</code>:</p>
+    <pre>
+behavior 2
+    self.x = self.x + 50 * dt
+    if self.x > 800 then
+        self.x = 0
+    end
+end</pre>
+    <p class="hint">Every object whose base shape is Shape 2 will run this behavior each frame.</p>
+
+    <h2>3. Audio Integration</h2>
+    <p>Upload any audio file (WAV, MP3, OGG) in the Audio tab. It is automatically compressed to a tiny low-bitrate MP3 to keep your game file small.</p>
+    <p>Use the Sound ID shown in the list:</p>
+    <ul>
+      <li><code>play_sound(0)</code> -- Play sound 0 once.</li>
+      <li><code>loop_sound(0)</code> -- Loop sound 0 forever (perfect for background music).</li>
+      <li><code>stop_sound(0)</code> -- Stop sound 0.</li>
+      <li><code>set_volume(0, 0.5)</code> -- Set sound 0 to 50% volume (0.0 = silent, 1.0 = max).</li>
+    </ul>
+    <p class="hint">Tip: Rename your audio files in the editor with the Rename button so you remember which ID is which!</p>
+
+    <h2>4. Built-in Functions and Variables</h2>
+    <ul>
+      <li><code>dt</code> -- Delta time in seconds. Multiply all speeds by this!</li>
+      <li><code>key_down("name")</code> -- Returns 1 if held, 0 if not. Supported names: <code>left right up down space enter escape shift ctrl tab w a s d e f q r</code> and any single letter or digit.</li>
+      <li><code>mouse_x</code> / <code>mouse_y</code> -- Current mouse position on the canvas.</li>
+      <li><code>mouse_down()</code> -- Returns 1 if the mouse button is held.</li>
+      <li><code>abs(x)</code> -- Absolute value.</li>
+      <li><code>sign(x)</code> -- Returns -1, 0, or 1.</li>
+      <li><code>play_anim(id)</code> -- Play animation on the current behavior object.</li>
+    </ul>
+
+    <h2>5. Editor Shortcuts</h2>
+    <ul>
+      <li><kbd>Ctrl</kbd> + <kbd>S</kbd> -- Force compile and reload.</li>
+      <li><kbd>Shift</kbd> + <kbd>G</kbd> + <kbd>U</kbd> + <kbd>I</kbd> (hold all four) -- Toggle the debug HUD overlay (FPS, key display, stats).</li>
+      <li><strong>Mode: Edit</strong> -- Drag objects on the canvas. Click to select.</li>
+      <li><strong>Mode: Play</strong> -- Keyboard input goes to the game. Dragging is disabled.</li>
+    </ul>
+    <p class="hint">When your cursor is inside the script editor, arrow keys and spacebar work normally for typing. The game only captures keys when the editor is not focused.</p>
+  </div>
+
+  <div id="futureContent" class="fade-section" style="display:none; opacity:0;">
+    <p class="hint">The vision for creating the best, fastest, and most accessible web-based game engine in the world.</p>
+
+    <h2>The Vision</h2>
+    <p>People playing and making fun games. Aiming for infinite (max) fun using no (min) energy and no (min) storage space. Core values for the editor is to be fun, fast, resource efficient, versatile, popular, and easy</p>
+
+    <h2>Potential To Work On</h2>
+    <ul>
+      <li><strong>Ultra-Compact Binary Formats:</strong> Transitioning core serialization to variable-length LEB128 encoding and Zstd compression. Have in-built sound maker system to allow good tiny-sized music to be made within editor</li>
+      <li><strong>Advanced Superinstructions:</strong> Improving the Virtual Machine to execute complex, repetitive operations (like physics, bounds checking, and state machines) in single bytecode instructions.</li>
+      <li><strong>High-Level Scripting Abstractions:</strong> Expanding the scripting language with built-in functions for spatial partitioning, vector mathematics, and switch-state logic to remove repetitive boilerplate.</li>
+      <li><strong>Seamless Hosting and Discovery:</strong> Need to make a way to allow people to find and play games from others. Also, need to have it in such a way that it makes sense why the engine is popular</li>
+      <li><strong>Intelligent Asset Pipelines:</strong> Implementing automatic vector geometry simplification and dynamic audio downsampling natively in the browser to ensure the entire game-engine system is efficient.</li>
+    </ul>
+
+    <h2>Engine Compilation Commands</h2>
+    <p>Below are the core terminal commands used to compile the engine, its tools, and the WebAssembly runtimes.</p>
+    <pre>
+# Build and run the offline rust toolchain
+cargo run -p tools
+
+# Compile the WebAssembly script compiler
+wasm-pack build compiler_wasm --target web --out-dir ../web/pkg_compiler
+
+# Compile the WebAssembly game runtime
+wasm-pack build runtime --target web --out-dir ../web/pkg
+
+# Test out the site locally (using Rust's basic-http-server)
+# (From Root)
+cd web
+basic-http-server .
+
+# Validate code correctness
+cargo check
+
+# Run the tests made
+cargo test -p compiler
+cargo test -p format</pre>
+  </div>
+<div class="footer">
+    <p>Made by rayofgoldenlight</p>
+    <p>Play the game editor demo by downloading it from the Github and importing the binary into the editor</p>
+    <a href="https://github.com/rayofgoldenlight/tools/tree/main/projects/cawnpiaknak" target="_blank" rel="noopener noreferrer" title="View Project on GitHub">
+      <svg height="32" viewBox="0 0 16 16" width="32" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+        <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path>
+      </svg>
+    </a>
+  </div>
+</div>
+
+<script>
+(function(){
+  // Setup GUI transitions
+  const futureBtn = document.getElementById('futureBtn');
+  const mainTitle = document.getElementById('mainTitle');
+  const docContent = document.getElementById('docContent');
+  const futureContent = document.getElementById('futureContent');
+  let inFuture = false;
+
+  futureBtn.onclick = () => {
+    inFuture = !inFuture;
+    document.body.classList.toggle('future-mode', inFuture);
+
+    const fadeOut = inFuture ? docContent : futureContent;
+    const fadeIn = inFuture ? futureContent : docContent;
+
+    fadeOut.style.opacity = 0;
+    setTimeout(() => {
+      fadeOut.style.display = 'none';
+      fadeIn.style.display = 'block';
+      
+      // Allow browser to register display:block before fading in
+      setTimeout(() => {
+        fadeIn.style.opacity = 1;
+      }, 30);
+      
+      futureBtn.textContent = inFuture ? "Back to Docs" : "The Future";
+      mainTitle.textContent = inFuture ? "The Future of the Engine" : "Engine Documentation";
+    }, 300);
+  };
+
+  // Game Logic
+  const C=document.getElementById('gc'),X=C.getContext('2d');
+  const scoreEl=document.getElementById('score'),togBtn=document.getElementById('togBtn');
+  const shopEl=document.getElementById('shop'),shopList=document.getElementById('shopList');
+
+  const G={
+    on:false,coins:0,shopOpen:false,mx:-999,my:-999,
+    parts:[],workers:[],floats:[],spawnAcc:0,last:0,
+    ups:{
+      gravity: {lv:0,max:5,base:3, name:'Gravity',  desc:'Particles fall faster'},
+      rain:    {lv:0,max:5,base:3, name:'Rain',      desc:'More particles spawn'},
+      fortune: {lv:0,max:5,base:5, name:'Fortune',   desc:'Higher coin chance'},
+      magnet:  {lv:0,max:5,base:4, name:'Magnet',    desc:'Bigger collect radius'},
+      workers: {lv:0,max:3,base:8, name:'Workers',   desc:'Auto-collecting sweepers'},
+      greed:   {lv:0,max:3,base:10,name:'Greed',     desc:'Chance for double coins'},
+    }
+  };
+
+  function ucost(k){return G.ups[k].base*(G.ups[k].lv+1)}
+  function resize(){C.width=innerWidth;C.height=innerHeight}
+  addEventListener('resize',resize);resize();
+  addEventListener('mousemove',e=>{G.mx=e.clientX;G.my=e.clientY});
+
+  function margins(){
+    const d=document.querySelector('.doc');
+    if(!d)return{lx:0,lw:0,rx:innerWidth,rw:0};
+    const r=d.getBoundingClientRect();
+    return{lx:0,lw:Math.max(0,r.left-5),rx:r.right+5,rw:Math.max(0,innerWidth-r.right-5)};
+  }
+
+  function spawn(){
+    const m=margins();
+    if(m.lw<30&&m.rw<30)return;
+    const useL=(m.lw>=30&&m.rw>=30)?Math.random()<.5:m.lw>=30;
+    const x=useL?m.lx+8+Math.random()*(m.lw-16):m.rx+8+Math.random()*(m.rw-16);
+    const isCoin = Math.random() < (0.1 + G.ups.fortune.lv * 0.05);
+    G.parts.push({
+      x: x, y: -20,
+      vy: 50 + Math.random() * 50 + (G.ups.gravity.lv * 30),
+      coin: isCoin,
+      dead: false
+    });
+  }
+
+  function addFloat(x, y, amt) {
+    G.floats.push({x: x, y: y, vy: -30, life: 1, txt: '+' + amt});
+  }
+
+  function buy(k) {
+    const cost = ucost(k);
+    if(G.coins >= cost && G.ups[k].lv < G.ups[k].max) {
+      G.coins -= cost;
+      G.ups[k].lv++;
+      scoreEl.textContent = 'Coins: ' + G.coins;
+      renderShop();
+      if(k === 'workers' && G.ups[k].lv > 0) {
+        spawnWorker();
+      }
+    }
+  }
+  window.buy = buy; 
+
+  function spawnWorker() {
+    const m = margins();
+    let side = 0; 
+    if(m.lw >= 30 && m.rw >= 30) side = Math.random() < 0.5 ? 0 : 1;
+    else if(m.lw >= 30) side = 0;
+    else if(m.rw >= 30) side = 1;
+    else return;
+
+    G.workers.push({
+      side: side,
+      y: 100 + Math.random() * (innerHeight - 200),
+      x: side === 0 ? m.lx + m.lw/2 : m.rx + m.rw/2,
+      vx: 80 + Math.random() * 40
+    });
+  }
+
+  function renderShop() {
+    shopList.innerHTML = '';
+    for(let k in G.ups) {
+      const u = G.ups[k];
+      const cost = ucost(k);
+      const maxed = u.lv >= u.max;
+      const canBuy = G.coins >= cost && !maxed;
+
+      const row = document.createElement('div');
+      row.className = 'urow';
+      row.innerHTML = `
+        <div class="uname" title="${u.desc}">${u.name} <span class="ulv">Lv.${u.lv}/${u.max}</span></div>
+        <button class="ubtn" ${canBuy ? '' : 'disabled'} onclick="buy('${k}')">${maxed ? 'MAX' : cost+'c'}</button>
+      `;
+      shopList.appendChild(row);
+    }
+  }
+
+  function collect(p) {
+    p.dead = true;
+    let amt = 1;
+    if(Math.random() < G.ups.greed.lv * 0.2) amt = 2; 
+    
+    G.coins += amt;
+    scoreEl.textContent = 'Coins: ' + G.coins;
+    addFloat(p.x, p.y, amt);
+
+    if(!G.shopOpen && G.coins >= 5) {
+      G.shopOpen = true;
+      shopEl.style.display = 'block';
+      renderShop();
+    } else if (G.shopOpen) {
+      renderShop();
+    }
+  }
+
+  function tick(t) {
+    if(!G.last) G.last = t;
+    const dt = Math.min((t - G.last) / 1000, 0.1);
+    G.last = t;
+
+    requestAnimationFrame(tick);
+    if(!G.on) {
+      if(G.parts.length > 0) {
+        X.clearRect(0, 0, C.width, C.height);
+        G.parts = [];
+        G.floats = [];
+      }
+      return;
+    }
+
+    X.clearRect(0, 0, C.width, C.height);
+    const m = margins();
+
+    // Dynamically adjust colors based on current mode for the canvas
+    const isLightMode = document.body.classList.contains('future-mode');
+    const colorRain = isLightMode ? '#6b7280' : '#9aa4c7';
+    const colorWorker = isLightMode ? '#009955' : '#00ff88';
+
+    G.spawnAcc += dt;
+    const spawnRate = 0.5 - (G.ups.rain.lv * 0.08); 
+    if(G.spawnAcc > Math.max(0.05, spawnRate)) {
+      G.spawnAcc = 0;
+      spawn();
+    }
+
+    const magnetRadius = 30 + G.ups.magnet.lv * 20;
+
+    X.fillStyle = colorWorker;
+    X.font = 'bold 18px monospace';
+    X.textAlign = 'center';
+    X.textBaseline = 'middle';
+    
+    G.workers.forEach(w => {
+       w.x += w.vx * dt;
+       let minX = w.side === 0 ? m.lx : m.rx;
+       let maxX = w.side === 0 ? m.lx + m.lw : m.rx + m.rw;
+       
+       if(w.x < minX + 10) { w.x = minX + 10; w.vx *= -1; }
+       if(w.x > maxX - 10) { w.x = maxX - 10; w.vx *= -1; }
+       
+       X.fillText('_', w.x, w.y);
+    });
+
+    for(let i = G.parts.length - 1; i >= 0; i--) {
+      const p = G.parts[i];
+      p.y += p.vy * dt;
+
+      if(p.coin) {
+         const dx = p.x - G.mx, dy = p.y - G.my;
+         if(dx*dx + dy*dy < magnetRadius * magnetRadius) collect(p);
+
+         if(!p.dead) {
+           for(let w of G.workers) {
+             if(Math.abs(p.x - w.x) < 25 && Math.abs(p.y - w.y) < 20) {
+               collect(p);
+               break;
+             }
+           }
+         }
+      }
+
+      if(p.y > C.height + 20) p.dead = true;
+
+      if(p.dead) {
+        G.parts.splice(i, 1);
+      } else {
+        if(p.coin) {
+          X.fillStyle = '#f7d06b';
+          X.font = 'bold 16px monospace';
+          X.shadowColor = '#f7d06b';
+          X.shadowBlur = 8;
+          X.fillText('o', p.x, p.y);
+          X.shadowBlur = 0;
+        } else {
+          X.fillStyle = colorRain;
+          X.font = '14px monospace';
+          X.fillText('*', p.x, p.y);
+        }
+      }
+    }
+
+    X.font = 'bold 14px monospace';
+    X.fillStyle = colorWorker;
+    for(let i = G.floats.length - 1; i >= 0; i--) {
+      const f = G.floats[i];
+      f.y += f.vy * dt;
+      f.life -= dt * 1.5;
+      if(f.life <= 0) G.floats.splice(i, 1);
+      else {
+        X.globalAlpha = f.life;
+        X.fillText(f.txt, f.x, f.y);
+        X.globalAlpha = 1;
+      }
+    }
+  }
+
+  togBtn.onclick = () => {
+    G.on = !G.on;
+    togBtn.textContent = G.on ? 'Stop Game' : 'Start Game';
+    if(G.on) {
+      G.last = performance.now(); 
+    }
+  };
+
+  requestAnimationFrame(tick);
+})();
+</script>
+</body>
+</html>

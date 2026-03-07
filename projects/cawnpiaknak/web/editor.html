@@ -1,0 +1,518 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Game Editor</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/lamejs/1.2.1/lame.min.js"></script>
+  <style>
+    html, body { height: 100%; margin: 0; background: #0f1220; color: #eaeaea; font-family: sans-serif; }
+    .layout { display: flex; height: 100%; }
+    .left { width: 45%; min-width: 320px; border-right: 1px solid #2a2f45; padding: 12px; box-sizing: border-box; }
+    .right { flex: 1; padding: 12px; box-sizing: border-box; display: flex; flex-direction: column; gap: 10px; }
+    textarea {
+      width: 100%; height: calc(100% - 50px);
+      background: #0b0e18; color: #eaeaea;
+      border: 1px solid #2a2f45; outline: none;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+      font-size: 14px; padding: 10px; box-sizing: border-box;
+      resize: none;
+    }
+    .toolbar { height: 38px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .toolbar-group { display: flex; align-items: center; gap: 6px; }
+    .toolbar-sep { width: 1px; height: 20px; background: #2a2f45; margin: 0 4px; }
+    .status { font-family: ui-monospace, monospace; font-size: 12px; color: #9aa4c7; }
+    canvas { border: 1px solid #2a2f45; background: #111; }
+    .hint { font-size: 12px; color: #9aa4c7; }
+
+    /* ── Modal ───────────────────────────── */
+    .modal-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.6);
+      display: flex; justify-content: center; align-items: center;
+      z-index: 1000;
+    }
+    .modal {
+      background: #161b2e;
+      border: 1px solid #2a2f45;
+      border-radius: 8px;
+      width: 640px;
+      max-width: 90vw;
+      max-height: 80vh;
+      display: flex;
+      flex-direction: column;
+    }
+    .modal-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      border-bottom: 1px solid #2a2f45;
+    }
+    .modal-header strong { margin-right: auto; font-size: 15px; }
+    .modal-close {
+      background: none; border: none; color: #eaeaea;
+      font-size: 22px; cursor: pointer; padding: 0 4px;
+    }
+    .modal-close:hover { color: #ff6b6b; }
+    .modal-tabs { display: flex; gap: 4px; }
+    .modal-tab {
+      background: #0b0e18; border: 1px solid #2a2f45;
+      color: #9aa4c7; padding: 4px 14px; cursor: pointer;
+      border-radius: 4px 4px 0 0; font-size: 13px;
+    }
+    .modal-tab.active {
+      background: #1e2440; color: #eaeaea;
+      border-bottom-color: #1e2440;
+    }
+    .modal-body {
+      padding: 12px 16px;
+      overflow-y: auto;
+      flex: 1;
+    }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    .tab-toolbar {
+      display: flex; gap: 8px;
+      margin-bottom: 10px;
+    }
+    .item-list {
+      display: flex; flex-direction: column; gap: 6px;
+    }
+    .item-list-empty {
+      color: #555; font-size: 13px; padding: 20px 0;
+      text-align: center;
+    }
+    .item-card {
+      background: #0b0e18;
+      border: 1px solid #2a2f45;
+      border-radius: 4px;
+      padding: 8px 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .item-card:hover { border-color: #3a4065; }
+    .item-card .swatch {
+      width: 32px; height: 32px;
+      border-radius: 4px;
+      border: 1px solid #2a2f45;
+      flex-shrink: 0;
+    }
+    .item-card .item-info { flex: 1; font-size: 13px; }
+    .item-card .item-info .item-name { font-weight: bold; }
+    .item-card .item-info .item-detail { color: #9aa4c7; font-size: 12px; }
+    .item-card .item-actions { display: flex; gap: 4px; }
+    .item-card .item-actions button {
+      background: #1e2440; border: 1px solid #2a2f45;
+      color: #9aa4c7; padding: 2px 8px; font-size: 12px;
+      cursor: pointer; border-radius: 3px;
+    }
+    .item-card .item-actions button:hover { color: #eaeaea; border-color: #3a4065; }
+    .item-card .item-actions button.danger:hover { color: #ff6b6b; border-color: #ff6b6b; }
+
+    /* ── Edit Form ───────────────────────── */
+    .edit-form {
+      background: #1e2440;
+      border: 1px solid #2a2f45;
+      border-radius: 6px;
+      padding: 12px 16px;
+      margin-top: 10px;
+    }
+    .edit-form-title {
+      font-weight: bold;
+      font-size: 14px;
+      margin-bottom: 10px;
+      color: #eaeaea;
+    }
+    .edit-form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    .edit-form-grid label {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      font-size: 12px;
+      color: #9aa4c7;
+    }
+    .edit-form-grid select,
+    .edit-form-grid input[type="number"] {
+      background: #0b0e18;
+      border: 1px solid #2a2f45;
+      color: #eaeaea;
+      padding: 4px 6px;
+      border-radius: 3px;
+      font-size: 13px;
+    }
+    .edit-form-grid input[type="color"] {
+      width: 100%;
+      height: 28px;
+      border: 1px solid #2a2f45;
+      background: #0b0e18;
+      border-radius: 3px;
+      cursor: pointer;
+      padding: 1px 2px;
+    }
+    .edit-form-preview {
+      display: flex;
+      justify-content: center;
+      margin: 10px 0;
+    }
+    .edit-form-preview canvas {
+      background: #1a1a2e;
+      border: 1px solid #2a2f45;
+      border-radius: 4px;
+    }
+    .edit-form-actions {
+      display: flex;
+      gap: 8px;
+      justify-content: flex-end;
+    }
+    .edit-form-actions button {
+      padding: 4px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 13px;
+    }
+    #sf-save {
+      background: #00cc6a; border: none; color: #000; font-weight: bold;
+    }
+    #sf-save:hover { background: #00ff88; }
+    #sf-cancel {
+      background: none; border: 1px solid #2a2f45; color: #9aa4c7;
+    }
+    #sf-cancel:hover { color: #eaeaea; border-color: #3a4065; }
+
+    #of-save {
+      background: #00cc6a; border: none; color: #000; font-weight: bold;
+    }
+    #of-save:hover { background: #00ff88; }
+    #of-cancel {
+      background: none; border: 1px solid #2a2f45; color: #9aa4c7;
+    }
+    #of-cancel:hover { color: #eaeaea; border-color: #3a4065; }
+    
+    /* ── Timeline UI ───────────────────────── */
+    .timeline-container {
+      display: flex; gap: 6px; overflow-x: auto; padding: 8px 0;
+      min-height: 60px; align-items: center;
+    }
+    .timeline-frame {
+      background: #0b0e18; border: 1px solid #2a2f45; border-radius: 4px;
+      min-width: 44px; height: 44px; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; position: relative;
+      flex-shrink: 0;
+    }
+    .timeline-frame canvas { width: 32px; height: 32px; }
+    .timeline-frame .del-frame {
+      position: absolute; top: -6px; right: -6px; background: #ff6b6b; color: #fff;
+      border: none; border-radius: 50%; width: 16px; height: 16px; font-size: 10px;
+      cursor: pointer; display: none; padding: 0; line-height: 16px; text-align: center;
+    }
+    .timeline-frame:hover .del-frame { display: block; }
+
+    #af-save { background: #00cc6a; border: none; color: #000; font-weight: bold; }
+    #af-save:hover { background: #00ff88; }
+    #af-cancel { background: none; border: 1px solid #2a2f45; color: #9aa4c7; }
+    #af-cancel:hover { color: #eaeaea; border-color: #3a4065; }
+
+    /* ── Draw Modal ───────────────────────── */
+    .draw-modal { background: #161b2e; border: 1px solid #2a2f45; border-radius: 8px; width: 500px; display: flex; flex-direction: column; }
+    .draw-toolbar { display: flex; gap: 10px; padding: 10px; background: #0b0e18; border-bottom: 1px solid #2a2f45; align-items: center; }
+    .draw-canvas-wrap { display: flex; justify-content: center; padding: 20px; background: #111; }
+    #drawCanvas { background: transparent; border: 1px dashed #3a4065; cursor: crosshair; }
+    .draw-actions { display: flex; justify-content: flex-end; gap: 10px; padding: 10px; border-top: 1px solid #2a2f45; }
+    .tool-btn { background: #1e2440; border: 1px solid #2a2f45; color: #eaeaea; padding: 4px 10px; cursor: pointer; border-radius: 4px; font-size: 13px;}
+    .tool-btn.active { background: #00cc6a; color: #000; font-weight: bold; border-color: #00ff88; }
+  </style>
+</head>
+<body>
+  <!-- Draw Modal -->
+  <div id="drawModal" class="modal-overlay" style="display:none; z-index: 2000;">
+    <div class="draw-modal">
+      <div class="modal-header">
+        <strong>Vector Draw Tool</strong>
+        <button id="drawModalClose" class="modal-close">&times;</button>
+      </div>
+      <div class="draw-toolbar">
+        <button id="drawBrushBtn" class="tool-btn active">Brush</button>
+        <input type="color" id="drawColorPicker" value="#ffffff" style="width:28px; height:28px; padding:0; border:1px solid #2a2f45; border-radius:4px; background:#0b0e18; cursor:pointer;" />
+        <button id="drawEraserBtn" class="tool-btn">Eraser</button>
+        <button id="drawUndoBtn" class="tool-btn">Undo</button>
+        <button id="drawClearBtn" class="tool-btn">Clear</button>
+        <div class="toolbar-sep"></div>
+        <label class="hint" style="display:flex; align-items:center; gap:4px;">
+          <input type="checkbox" id="drawOnionSkin" checked> Onion Skin
+        </label>
+      </div>
+      <div class="draw-canvas-wrap">
+        <canvas id="drawCanvas" width="200" height="200"></canvas>
+      </div>
+      <div class="draw-actions">
+        <button id="drawSaveBtn" class="tool-btn" style="background: #00cc6a; color: #000;">Save Drawing</button>
+        <button id="drawCancelBtn" class="tool-btn">Cancel</button>
+      </div>
+    </div>
+  </div>
+  <!-- Object Manager Modal -->
+  <div id="objModal" class="modal-overlay" style="display:none">
+    <div class="modal">
+      <div class="modal-header">
+        <strong>Object Manager</strong>
+        <div class="modal-tabs">
+          <button class="modal-tab active" data-tab="shapes">Shapes</button>
+          <button class="modal-tab" data-tab="animations">Animations</button>
+          <button class="modal-tab" data-tab="audio">Audio</button>
+          <button class="modal-tab" data-tab="objects">Objects</button>
+        </div>
+        <button id="objModalClose" class="modal-close">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <!-- Shapes Tab -->
+        <div id="tab-shapes" class="tab-content active">
+          <div class="tab-toolbar">
+            <button id="addShapeBtn">+ Add Parametric Shape</button>
+            <button id="drawShapeBtn">+ Draw Vector Shape</button> <!-- NEW -->
+          </div>
+          <div id="shapeList" class="item-list">
+            <div class="item-list-empty">No shapes defined. Click "+ Add Shape" to start.</div>
+          </div>
+
+          <!-- Inline shape edit form (hidden by default) -->
+          <div id="shapeForm" class="edit-form" style="display:none">
+            <div class="edit-form-title" id="shapeFormTitle">New Shape</div>
+            <div class="edit-form-grid">
+              <label>Type
+                <select id="sf-type">
+                  <option value="circle">Circle</option>
+                  <option value="rect">Rectangle</option>
+                  <option value="text">Text</option>
+                </select>
+              </label>
+              <label>Draw Mode
+                <select id="sf-mode">
+                  <option value="fill">Fill</option>
+                  <option value="stroke">Stroke</option>
+                  <option value="both">Both</option>
+                </select>
+              </label>
+              <label>Fill Color
+                <input type="color" id="sf-fill" value="#00ff88" />
+              </label>
+              <label>Stroke Color
+                <input type="color" id="sf-stroke" value="#ffffff" />
+              </label>
+              <label>Stroke Width
+                <input type="number" id="sf-strokeW" value="2" min="0" max="20" step="0.5" />
+              </label>
+
+              <!-- Circle params -->
+              <label id="sf-radius-label">Radius
+                <input type="number" id="sf-radius" value="20" min="1" max="500" step="1" />
+              </label>
+
+              <!-- Rect params -->
+              <label id="sf-width-label" style="display:none">Width
+                <input type="number" id="sf-width" value="40" min="1" max="1000" step="1" />
+              </label>
+              <label id="sf-height-label" style="display:none">Height
+                <input type="number" id="sf-height" value="40" min="1" max="1000" step="1" />
+              </label>
+
+              <!-- Text params -->
+              <label id="sf-text-label" style="display:none">Text String
+                <input type="text" id="sf-text" value="Hello World" style="background:#0b0e18;color:#eaeaea;border:1px solid #2a2f45;padding:4px 6px;border-radius:3px;" />
+              </label>
+              <label id="sf-size-label" style="display:none">Font Size
+                <input type="number" id="sf-size" value="24" min="8" max="144" step="1" />
+              </label>
+              <label id="sf-align-label" style="display:none">Alignment
+                <select id="sf-align">
+                  <option value="0">Left</option>
+                  <option value="1">Center</option>
+                  <option value="2">Right</option>
+                </select>
+              </label>
+            </div>
+
+            <div class="edit-form-preview">
+              <canvas id="sf-preview" width="80" height="80"></canvas>
+            </div>
+
+            <div class="edit-form-actions">
+              <button id="sf-save">Save</button>
+              <button id="sf-cancel">Cancel</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Animations Tab -->
+        <div id="tab-animations" class="tab-content">
+          <div class="tab-toolbar">
+            <button id="addAnimBtn">+ Add Animation</button>
+          </div>
+          <div id="animList" class="item-list">
+            <div class="item-list-empty">No animations defined.</div>
+          </div>
+
+          <!-- Inline animation edit form -->
+          <div id="animForm" class="edit-form" style="display:none">
+            <div class="edit-form-title" id="animFormTitle">New Animation</div>
+            
+            <div class="edit-form-grid">
+              <label>FPS (Speed)
+                <input type="number" id="af-fps" value="12" min="1" max="60" step="1" />
+              </label>
+            </div>
+            
+            <div style="margin-top: 12px; color: #eaeaea; font-size: 13px; font-weight: bold;">Timeline Sequence</div>
+            <div id="af-timeline" class="timeline-container">
+                <!-- JS will populate frames here -->
+            </div>
+            
+            <div style="margin-top: 5px; display: flex; gap: 6px;">
+              <input type="text" id="af-bulk-frames" placeholder="e.g. 4-20,3,21-23" style="background:#0b0e18;color:#eaeaea;border:1px solid #2a2f45;padding:4px;border-radius:3px;width:140px;" />
+              <button id="af-add-bulk" style="background:#1e2440;color:#9aa4c7;border:1px solid #2a2f45;padding:4px 8px;cursor:pointer;border-radius:3px;">+ Add Bulk</button>
+              
+              <span style="color:#2a2f45; margin: 0 4px;">|</span>
+              
+              <select id="af-shape-select" style="background:#0b0e18;color:#eaeaea;border:1px solid #2a2f45;padding:4px;border-radius:3px;"></select>
+              <button id="af-add-frame" style="background:#1e2440;color:#9aa4c7;border:1px solid #2a2f45;padding:4px 8px;cursor:pointer;border-radius:3px;">+ Add Frame</button>
+            </div>
+
+            <div class="edit-form-preview" style="margin-top: 15px;">
+              <canvas id="af-preview" width="80" height="80"></canvas>
+            </div>
+
+            <div class="edit-form-actions" style="margin-top: 10px;">
+              <button id="af-save">Save</button>
+              <button id="af-cancel">Cancel</button>
+            </div>
+          </div>
+        </div>
+        <!-- Audio Tab -->
+        <div id="tab-audio" class="tab-content">
+          <div class="tab-toolbar">
+            <button id="addAudioBtn">+ Upload Audio</button>
+            <input type="file" id="audioUpload" accept="audio/mpeg, audio/ogg, audio/wav" style="display:none" />
+          </div>
+          <div id="audioList" class="item-list">
+            <div class="item-list-empty">No audio files uploaded.</div>
+          </div>
+        </div>
+        <!-- Objects Tab -->
+        <div id="tab-objects" class="tab-content">
+          <div class="tab-toolbar">
+            <button id="addObjectBtn">+ Add Object</button>
+          </div>
+          <div id="objectList" class="item-list">
+            <div class="item-list-empty">No objects placed. Click "+ Add Object" to start.</div>
+          </div>
+
+          <!-- Inline object edit form (hidden by default) -->
+          <div id="objectForm" class="edit-form" style="display:none">
+            <div class="edit-form-title" id="objectFormTitle">New Object</div>
+            <div class="edit-form-grid">
+              <label>Shape
+                <select id="of-shape"></select>
+              </label>
+              <label>Animation (Overrides Shape)
+                <select id="of-anim"></select>
+              </label>
+              <label>Scale
+                <input type="number" id="of-scale" value="1" min="0.1" max="10" step="0.1" />
+              </label>
+              <label>X
+                <input type="number" id="of-x" value="400" step="1" />
+              </label>
+              <label>Y
+                <input type="number" id="of-y" value="300" step="1" />
+              </label>
+              <label>Rotation (rad)
+                <input type="number" id="of-rot" value="0" min="-6.28" max="6.28" step="0.1" />
+              </label>
+            </div>
+            <div class="edit-form-actions">
+              <button id="of-save">Save</button>
+              <button id="of-cancel">Cancel</button>
+            </div>
+          </div>
+        </div>
+    </div>
+  </div>
+  </div>
+
+  <!-- Hidden file input for importing .bin files -->
+  <input type="file" id="importFile" accept=".bin" style="display: none" />
+
+  <div class="layout">
+    <div class="left">
+      <div class="toolbar">
+        <strong>Script</strong>
+
+        <div class="toolbar-group">
+          <button id="compileBtn">Compile</button>
+          <button id="resetBtn">Reset</button>
+          <button id="objManagerBtn">Objects</button>
+        </div>
+
+        <div class="toolbar-sep"></div>
+
+        <div class="toolbar-group">
+          <button id="exportBtn">Export .bin</button>
+          <button id="importBtn">Import .bin</button>
+        </div>
+
+        <div class="toolbar-sep"></div>
+
+        <label style="display:flex; align-items:center; gap:6px;">
+          <input type="checkbox" id="autoCompile" checked />
+          Auto
+        </label>
+
+        <label style="display:flex; align-items:center; gap:6px;">
+          Example:
+          <select id="exampleSelect">
+            <option value="movement">Movement</option>
+            <option value="coins">Coins</option>
+          </select>
+        </label>
+
+        <span class="status" id="status">Loading...</span>
+      </div>
+
+      <div id="stats" style="font-family: ui-monospace, monospace; font-size: 12px; color: #9aa4c7; margin-top:8px;">
+        Bytecode: (none)
+      </div>
+
+      <pre id="errors" style="
+        color:#ff6b6b;
+        white-space:pre-wrap;
+        margin:8px 0 0 0;
+        min-height: 18px;
+      "></pre>
+      <textarea id="script" spellcheck="false"></textarea>
+      <div class="hint">Edit script and preview updates live.</div>
+    </div>
+
+    <div class="right">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <strong>Preview</strong>
+          <a href="help.html" target="_blank" style="color: #f7d06b; border: 1px solid #f7d06b; padding: 2px 8px; border-radius: 4px; text-decoration: none; font-size: 12px; font-weight: bold;">Help / Docs</a>
+        </div>
+        <button id="modeToggleBtn" style="background: #1e2440; border: 1px solid #2a2f45; color: #eaeaea; padding: 4px 10px; cursor: pointer; border-radius: 4px; font-weight: bold;">Mode: Edit</button>
+      </div>
+      <canvas id="preview-canvas" width="800" height="600"></canvas>
+      <div class="hint">Arrow keys should move the player if base.bin contains movement bytecode.</div>
+      <div class="hint">Recommendation: 100% window zoom for playing, 75% for editing</div>
+      <div class="hint">Also, before you play, make sure you click the "Mode: Edit" button so you get on "Mode: Play" mode so that object dragging gets disabled.</div>
+    </div>
+  </div>
+
+  <script type="module" src="./editor.js"></script>
+</body>
+</html>
