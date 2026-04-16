@@ -1100,7 +1100,7 @@ foreign export ccall "analyze_pe_wasm"
 -- | function JS will call
 analyzePeWasm :: Ptr Word8 -> Int -> Int -> Int -> IO CString
 analyzePeWasm ptr len doDisasmInt maxInstr = do
-    strictBytes <- BS.packCStringLen (castPtr ptr, len)
+    strictBytes <- BSU.unsafePackCStringLen (castPtr ptr, len)
     let lazyBytes = BL.fromStrict strictBytes
     
     let doDisasm = doDisasmInt == 1 -- Convert C Int to Haskell Bool
