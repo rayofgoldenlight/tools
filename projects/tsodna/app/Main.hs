@@ -2,15 +2,6 @@
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE OverloadedStrings #-}
 
--- on Windows
--- to recompile this, use (in WSL, need to install ghc-wasm-meta from here: https://github.com/haskell-wasm/ghc-wasm-meta):
--- source ~/.ghc-wasm/env
--- wasm32-wasi-cabal build --allow-newer
--- cp $(find dist-newstyle -name "*.wasm" | grep -v "dependencies") ./analyzer.wasm
--- 
--- for optimization:
--- wasm-opt -O3 -o analyzer.wasm analyzer.wasm
-
 module Main where
 
 import GHC.Generics (Generic)
@@ -35,6 +26,11 @@ import qualified Data.Text.Encoding.Error as TE
 import Data.List (find, foldl')
 import Data.Int (Int8, Int32)
 import qualified Data.Set as Set
+
+import Foreign.Marshal.Alloc (mallocBytes)
+import Foreign.Marshal.Utils (copyBytes)
+import Foreign.Storable (pokeByteOff)
+import qualified Data.ByteString.Unsafe as BSU
 
 import Data.Binary.Get
 
@@ -125,11 +121,11 @@ extractAsciiFast cap strictBytes =
             Just n  -> take n filtered
             Nothing -> filtered
         
-    -- Decode to Text, ignoring malformed byte sequences
+    -- Decode safely to Text, ignoring malformed byte sequences
     in map (TE.decodeUtf8With TE.lenientDecode) validChunks
     
 -- | Extracts Windows Wide Strings (UTF-16LE, printable ASCII subset).
--- Look for sequences of (Printable Byte, 0x00)
+-- Looks for sequences of (Printable Byte, 0x00)
 extractWideAsciiFast :: Maybe Int -> BS.ByteString -> [Text]
 extractWideAsciiFast cap bs = takeCap (go 0)
   where
@@ -322,7 +318,7 @@ parseDelayImports fullBytes sections is64 delayDir =
                 in extractDescriptors (off + 32) (count + 1) (reverse formatted ++ acc)
             _ -> acc
 
-    -- reusing Thunk logic as normal imports
+    -- Reusing Thunk logic as normal imports
     extractThunks rva count acc =
         if count > 500 || rva == 0 then acc else
         case rvaToOffset rva sections of
@@ -344,7 +340,7 @@ parseDelayImports fullBytes sections is64 delayDir =
                            in extractThunks (rva + thunkSize) (count + 1) (funcName : acc)
                        Nothing -> extractThunks (rva + thunkSize) (count + 1) acc
 
--- | calculate Shannon Entropy of ByteString (0.0 to 8.0)
+-- | Calculate Shannon Entropy of ByteString (0.0 to 8.0)
 calculateEntropy :: BL.ByteString -> Double
 calculateEntropy bs
     | len == 0  = 0.0
@@ -356,7 +352,7 @@ calculateEntropy bs
     -- Calculate probability per byte
     probs = map (\count -> count / len) (M.elems freqs)
 
--- | anomalies in PE sections and Entry Point
+-- | Detect anomalies in PE sections and Entry Point
 detectAnomalies :: Word32 -> [SectionHeader] -> [Text]
 detectAnomalies epRva sections =
     let 
@@ -372,7 +368,7 @@ detectAnomalies epRva sections =
                 in (if isWritable then ["Entry Point is inside a Writable section (" <> name <> "). Highly indicative of packing/injection."] else []) ++
                    (if not isExec then ["Entry Point is inside a Non-Executable section (" <> name <> ")."] else [])
 
-        -- Check sections for size/permission anomalies
+        -- Check all sections for size/permission anomalies
         secAnomalies = concatMap checkSec sections
         checkSec s =
             let name = T.pack . BSC.unpack . BS.takeWhile (/= 0) $ secName s
@@ -389,7 +385,7 @@ detectAnomalies epRva sections =
 
     in epAnomalies ++ secAnomalies
     
--- | threat categories, severity, and API substrings that trigger them
+-- | Defines threat categories, severity, and API substrings that trigger them
 behaviorRules :: [(Text, Text, [Text])]
 behaviorRules = 
     [ ("Process Injection & Memory Manipulation", "High", 
@@ -1112,9 +1108,17 @@ analyzePeWasm ptr len doDisasmInt maxInstr = do
     
     -- Pass flag into analyzePE
     let report = analyzePE "browser_upload.exe" strictBytes lazyBytes doDisasm disasmLimit
+
+    let jsonStrict = BL.toStrict (encode report)
+    let jsonLen = BS.length jsonStrict
     
-    let jsonString = BL8.unpack (encode report)
-    newCString jsonString
+    outPtr <- mallocBytes (jsonLen + 1)
+
+    BSU.unsafeUseAsCString jsonStrict $ \cStr -> do
+        copyBytes outPtr cStr jsonLen
+        pokeByteOff outPtr jsonLen (0 :: Word8)
+
+    return outPtr
 
 -- | Main entry point for CLI testing
 main :: IO ()
