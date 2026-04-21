@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manomi</title>
+    <link rel="icon" type="image/x-icon" href="https://i.postimg.cc/WpBMQmVy/gl-ll.png">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/sql-wasm.js"></script>
+    <style>
+        :root {
+            --bg-parchment: #f4f0e6;
+            --bg-panel: #fcfbf9;
+            --text-ink: #1c1b18;
+            --text-muted: #5c5a52;
+            --accent-forest: #2c4c3b;
+            --accent-hover: #1e3529;
+            --border-color: #d1c7b7;
+            --highlight-bg: #e3ebd8;
+        }
+
+        body { 
+            font-family: ui-serif, Georgia, Cambria, "Times New Roman", serif;
+            background-color: var(--bg-parchment);
+            color: var(--text-ink);
+            max-width: 1000px; 
+            margin: 2rem auto; 
+            padding: 0 1rem; 
+            line-height: 1.6; 
+        }
+
+        h1, h2, h3 { font-weight: normal; color: var(--accent-forest); }
+        h1 { border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem; margin-bottom: 1.5rem; }
+        
+        /* 状态与搜索栏 */
+        .status-banner { padding: 1rem; background: var(--bg-panel); color: var(--text-muted); border: 1px solid var(--border-color); border-radius: 4px; margin-bottom: 1rem; font-style: italic; }
+        .hidden { display: none !important; }
+        
+        #search-box {
+            width: 100%; padding: 0.75rem; font-size: 1.1rem;
+            font-family: system-ui, sans-serif;
+            background: var(--bg-panel); border: 1px solid var(--border-color);
+            border-radius: 4px; color: var(--text-ink);
+            box-sizing: border-box; transition: border-color 0.2s;
+        }
+        #search-box:focus { outline: none; border-color: var(--accent-forest); box-shadow: 0 0 0 2px var(--highlight-bg); }
+
+        /* 布局 */
+        #main-content { display: flex; gap: 2rem; margin-top: 2rem; flex-wrap: wrap; }
+        #tree-container { flex: 1; min-width: 300px; border-right: 1px solid var(--border-color); padding-right: 1rem; font-family: system-ui, sans-serif; }
+        #details-container { flex: 1; min-width: 300px; }
+
+        /* 树形菜单与列表 */
+        ul.tree { list-style-type: none; padding-left: 1.5rem; margin: 0.5rem 0; }
+        .tree-root { padding-left: 0; }
+        .toggle { cursor: pointer; color: var(--accent-forest); font-family: monospace; font-weight: bold; width: 1.5rem; display: inline-block; }
+        .motif-line { margin: 0.35rem 0; }
+        .motif-code { font-weight: bold; margin-right: 0.5rem; color: var(--accent-forest); }
+
+        .clickable { cursor: pointer; transition: color 0.2s; }
+        .clickable:hover { text-decoration: underline; color: var(--accent-hover); }
+        
+        /* 详情卡片 */
+        .detail-card { 
+            background: var(--bg-panel); border: 1px solid var(--border-color); 
+            padding: 2rem; border-radius: 4px; position: sticky; top: 2rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+        .tag { 
+            display: inline-block; background: var(--highlight-bg); color: var(--accent-forest); 
+            padding: 0.25rem 0.6rem; border-radius: 4px; font-size: 0.85em; 
+            margin: 0.2rem 0.2rem 0 0; cursor: pointer; font-family: system-ui, sans-serif;
+            border: 1px solid rgba(44, 76, 59, 0.2); transition: background 0.2s;
+        }
+        .tag:hover { background: #d0dcbf; }
+
+        /* 页脚样式 */
+        .site-footer {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.75rem;
+            margin-top: 3rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border-color);
+            color: var(--text-muted);
+            font-size: 0.9em;
+            font-style: italic;
+        }
+
+        .github-link {
+            color: var(--text-muted);
+            transition: color 0.2s ease;
+        }
+
+        .github-link:hover {
+            color: var(--accent-hover);
+        }
+        
+        mark { background: var(--highlight-bg); color: var(--text-ink); font-weight: bold; padding: 0 0.2em; border-radius: 2px; }
+
+        /* 响应式 */
+        @media (max-width: 768px) {
+            #tree-container { border-right: none; border-bottom: 1px solid var(--border-color); padding-bottom: 1rem; padding-right: 0; }
+        }
+        
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Stith Thompson's Motif-Index of Folk-Literature Indexer</h1>
+        <div id="status" class="status-banner">Loading database and initializing...</div>
+    </header>
+    
+    <div id="search-container" class="hidden">
+        <input type="text" id="search-box" placeholder="Search motifs by keyword or code (e.g., 'raven creator', 'A123')...">
+    </div>
+    
+    <main id="main-content" class="hidden">
+        <!-- Left column: Search Results -->
+        <aside id="tree-container">
+            <h2 id="left-title" style="font-family: ui-serif, serif;">Index Browser</h2>
+            <div id="search-results" class="hidden"></div>
+            <div id="tree-root" class="tree tree-root"></div>
+        </aside>
+        
+        <!-- Right column: Motif Details -->
+        <section id="details-container">
+            <div id="motif-details">
+                <p style="color: var(--text-muted); font-style: italic;">Select a motif from the index to view its details.</p>
+            </div>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <div>Site built by <b>rayofgoldenlight</b></div>
+        <a href="https://github.com/rayofgoldenlight/tools/tree/main/projects/manomi" target="_blank" rel="noopener noreferrer" class="github-link" aria-label="View source on GitHub">
+            <svg height="24" width="24" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path>
+            </svg>
+        </a>
+    </footer>
+
+    <script>
+        let db; 
+
+        async function initApp() {
+            try {
+                const SQL = await initSqlJs({ locateFile: file => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/${file}` });
+                // Fetch the .gz file
+                const response = await fetch('motifs.sqlite.gz');
+                if (!response.ok) throw new Error("Failed to load motifs.sqlite.gz.");
+
+                // Use browser's native unzipper to decompress stream
+                const ds = new DecompressionStream('gzip');
+                const decompressedStream = response.body.pipeThrough(ds);
+
+                // Convert decompressed stream back into a buffer for SQLite
+                const blob = await new Response(decompressedStream).blob();
+                const buffer = await blob.arrayBuffer();
+
+                db = new SQL.Database(new Uint8Array(buffer));
+                
+                document.getElementById('status').classList.add('hidden');
+                document.getElementById('search-container').classList.remove('hidden');
+
+                document.getElementById('main-content').classList.remove('hidden');
+
+                loadTree(null, document.getElementById('tree-root'));
+
+            } catch (err) {
+                document.getElementById('status').innerText = `Error: ${err.message}`;
+                console.error(err);
+            }
+        }
+
+        function loadTree(parentCode, container) {
+            let stmt;
+            if (parentCode === null) {
+                stmt = db.prepare(`
+                    SELECT code, title, (SELECT count(*) FROM motifs m2 WHERE m2.parent_code = m1.code) as child_count 
+                    FROM motifs m1 WHERE parent_code IS NULL ORDER BY code;
+                `);
+            } else {
+                stmt = db.prepare(`
+                    SELECT code, title, (SELECT count(*) FROM motifs m2 WHERE m2.parent_code = m1.code) as child_count 
+                    FROM motifs m1 WHERE parent_code = $parent ORDER BY code;
+                `);
+                stmt.bind({$parent: parentCode});
+            }
+
+            const ul = document.createElement('ul');
+            ul.className = 'tree';
+
+            while(stmt.step()) {
+                const row = stmt.getAsObject();
+                const li = document.createElement('li');
+                li.className = 'motif-line';
+                
+                const hasChildren = row.child_count > 0;
+                
+                // Toggle button [+] or [-]
+                const toggle = document.createElement('span');
+                toggle.className = 'toggle';
+                toggle.textContent = hasChildren ? '[+]' : '   ';
+                
+                // Motif Text
+                const text = document.createElement('span');
+                text.className = 'clickable';
+                text.innerHTML = `<span class="motif-code">${row.code}</span> ${row.title || ''}`;
+                text.onclick = () => loadMotifDetails(row.code);
+                
+                li.appendChild(toggle);
+                li.appendChild(text);
+
+                const childrenContainer = document.createElement('div');
+                childrenContainer.className = 'hidden';
+                li.appendChild(childrenContainer);
+                
+                // Toggle click event
+                if (hasChildren) {
+                    toggle.onclick = () => {
+                        const isHidden = childrenContainer.classList.contains('hidden');
+                        if (isHidden) {
+                            childrenContainer.classList.remove('hidden');
+                            toggle.textContent = '[-]';
+                            if (childrenContainer.innerHTML === '') {
+                                loadTree(row.code, childrenContainer);
+                            }
+                        } else {
+                            childrenContainer.classList.add('hidden');
+                            toggle.textContent = '[+]';
+                        }
+                    };
+                }
+                
+                ul.appendChild(li);
+            }
+            stmt.free();
+            container.appendChild(ul);
+        }
+
+        function escapeHTML(str) {
+            if (!str) return '';
+            return str.toString().replace(/[&<>'"]/g, 
+                tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag])
+            );
+        }
+
+        function loadMotifDetails(code) {
+            const detailsDiv = document.getElementById('motif-details');
+            
+            // Fetch Motif
+            const motifStmt = db.prepare("SELECT * FROM motifs WHERE code = $code");
+            motifStmt.bind({$code: code});
+            if (!motifStmt.step()) {
+                detailsDiv.innerHTML = `<div class="detail-card"><p style="color: var(--text-muted);">No record was found for motif <strong>${escapeHTML(code)}</strong>.</p></div>`;
+                motifStmt.free(); return;
+            }
+            const motif = motifStmt.getAsObject();
+            motifStmt.free();
+
+            // Fetch Attestations
+            const attStmt = db.prepare("SELECT culture, raw_citation FROM attestations WHERE motif_code = $code");
+            attStmt.bind({$code: code});
+            let attestationsHtml = '';
+            while (attStmt.step()) {
+                const att = attStmt.getAsObject();
+                attestationsHtml += `<li style="margin-bottom: 0.75rem; line-height: 1.4;">
+                    <strong style="color: var(--text-ink); font-family: system-ui, sans-serif; font-size: 0.9em;">${escapeHTML(att.culture)}:</strong> 
+                    <span style="color: var(--text-muted);">${escapeHTML(att.raw_citation)}</span>
+                </li>`;
+            }
+            attStmt.free();
+
+            if (!attestationsHtml) {
+                attestationsHtml = '<p style="color: var(--text-muted); font-style: italic; font-size: 0.9em;">No attestations recorded in this archive.</p>';
+            } else {
+                attestationsHtml = `<ul style="padding-left: 1.2rem; margin-top: 0.5rem;">${attestationsHtml}</ul>`;
+            }
+
+            // Fetch Cross-ref
+            const xrefStmt = db.prepare("SELECT to_code, relation FROM crossrefs WHERE from_code = $code");
+            xrefStmt.bind({$code: code});
+            let xrefsHtml = '';
+            while (xrefStmt.step()) {
+                const xref = xrefStmt.getAsObject();
+                xrefsHtml += `<span class="tag" onclick="loadMotifDetails('${escapeHTML(xref.to_code)}')">${escapeHTML(xref.relation)} ${escapeHTML(xref.to_code)}</span>`;
+            }
+            xrefStmt.free();
+            
+            if (!xrefsHtml) {
+                xrefsHtml = '<p style="color: var(--text-muted); font-style: italic; font-size: 0.9em;">No cross-references available.</p>';
+            } else {
+                xrefsHtml = `<div style="margin-top: 0.5rem; display: flex; flex-wrap: wrap;">${xrefsHtml}</div>`;
+            }
+
+            // Render right panel
+            detailsDiv.innerHTML = `
+                <div class="detail-card">
+                    <div style="margin-bottom: 1rem;">
+                        <span style="font-family: system-ui, sans-serif; font-size: 0.85rem; font-weight: bold; border: 1px solid var(--border-color); padding: 0.2rem 0.5rem; border-radius: 4px; background: var(--bg-parchment); color: var(--accent-forest); letter-spacing: 0.05em;">
+                            MOTIF ${escapeHTML(motif.code)}
+                        </span>
+                    </div>
+                    
+                    <h2 style="margin-top: 0; margin-bottom: 1rem; color: var(--text-ink); font-size: 1.8rem; line-height: 1.2;">
+                        ${escapeHTML(motif.title || 'Untitled Motif')}
+                    </h2>
+                    
+                    ${motif.description ? `
+                        <div style="padding: 1.2rem; background: var(--bg-parchment); border-left: 3px solid var(--border-color); border-radius: 2px; color: var(--text-ink); margin-bottom: 2rem; font-style: italic;">
+                            ${escapeHTML(motif.description)}
+                        </div>
+                    ` : ''}
+                    
+                    <div style="margin-top: 2rem; border-top: 1px solid var(--border-color); padding-top: 1.5rem;">
+                        <h3 style="margin: 0 0 0.5rem 0; color: var(--text-muted); font-family: system-ui, sans-serif; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.1em;">
+                            Cross-References
+                        </h3>
+                        ${xrefsHtml}
+                    </div>
+
+                    <div style="margin-top: 1.5rem; border-top: 1px solid var(--border-color); padding-top: 1.5rem;">
+                        <h3 style="margin: 0 0 0.5rem 0; color: var(--text-muted); font-family: system-ui, sans-serif; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.1em;">
+                            Attestations
+                        </h3>
+                        ${attestationsHtml}
+                    </div>
+                </div>
+            `;
+        }
+
+        const searchBox = document.getElementById('search-box');
+        const treeRoot = document.getElementById('tree-root');
+        const searchResults = document.getElementById('search-results');
+        const leftTitle = document.getElementById('left-title');
+
+        let searchTimeout;
+
+        searchBox.addEventListener('input', (e) => {
+            clearTimeout(searchTimeout);
+            
+            searchTimeout = setTimeout(() => {
+                const query = e.target.value.trim();
+
+                if (query.length < 2) {
+                    treeRoot.classList.remove('hidden');
+                    searchResults.classList.add('hidden');
+                    leftTitle.innerText = 'Browse the Index';
+                    return;
+                }
+                leftTitle.innerText = 'Search Results';
+                
+                const safeQuery = query
+                    .replace(/[^a-zA-Z0-9\s]/g, '') 
+                    .trim()
+                    .split(/\s+/)
+                    .map(word => word + '*') 
+                    .join(' AND ');
+
+                try {
+                    const stmt = db.prepare(`
+                        SELECT code, title, snippet(motifs_fts, '<mark>', '</mark>', '...', -1, 15) as snip
+                        FROM motifs_fts 
+                        WHERE motifs_fts MATCH $query 
+                        LIMIT 50
+                    `);
+
+                    stmt.bind({$query: safeQuery});
+                    
+                    let resultsHtml = '<ul style="list-style:none; padding:0;">';
+                    let count = 0;
+                    
+                    while (stmt.step()) {
+                        count++;
+                        const row = stmt.getAsObject();
+                        resultsHtml += `
+                            <li style="margin-bottom: 1rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">
+                                <div class="clickable motif-search-item" data-code="${row.code}">
+                                    <span class="motif-code">${row.code}</span> <strong>${row.title || ''}</strong>
+                                </div>
+                                <div style="font-size: 0.85em; color: var(--text-muted); margin-top: 0.25rem;">${row.snip}</div>
+                            </li>
+                        `;
+                    }
+                    stmt.free();
+                    
+                    if (count === 0) {
+                        resultsHtml = '<p style="color: var(--text-muted);">No matching motifs found. Try broader terms.</p>';
+                    } else {
+                        resultsHtml = `<p style="color: var(--accent-forest); font-size: 0.9em;"><em>Found ${count} matching record(s).</em></p>` + resultsHtml + '</ul>';
+                    }
+
+                    searchResults.innerHTML = resultsHtml;
+                    treeRoot.classList.add('hidden');
+                    searchResults.classList.remove('hidden');
+
+                } catch (err) {
+                    console.error("Search error:", err);
+                }
+            }, 1); // 1ms debounce
+        });
+
+        searchResults.addEventListener('click', (e) => {
+            const item = e.target.closest('.motif-search-item');
+            if (item && item.dataset.code) {
+                loadMotifDetails(item.dataset.code);
+            }
+        });
+
+        initApp();
+    </script>
+</body>
+</html>
