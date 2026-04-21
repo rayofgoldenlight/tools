@@ -113,7 +113,7 @@
     </header>
     
     <div id="search-container" class="hidden">
-        <input type="text" id="search-box" placeholder="Search motifs by keyword or code (e.g., 'raven creator', 'A123')...">
+        <input type="text" id="search-box" placeholder="Search motifs by keyword or code (e.g., 'magic rock', 'A101')...">
     </div>
     
     <main id="main-content" class="hidden">
@@ -347,7 +347,7 @@
                 if (query.length < 2) {
                     treeRoot.classList.remove('hidden');
                     searchResults.classList.add('hidden');
-                    leftTitle.innerText = 'Browse the Index';
+                    leftTitle.innerText = 'Index Browser';
                     return;
                 }
                 leftTitle.innerText = 'Search Results';
