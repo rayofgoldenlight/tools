@@ -1,0 +1,17 @@
+name: Handrit Idxu
+
+on:
+  push:
+    paths:
+      - 'projects/handrit/files/**'   # only when files change
+
+jobs:
+  dispatch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send repository_dispatch to pages repo
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ secrets.DINGDONG }}
+          repository: rayofgoldenlight/rayofgoldenlight.github.io
+          event-type: handrit-update
