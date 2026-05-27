@@ -77,10 +77,7 @@ def decrypt_password(encrypted_blob, master_key):
 
 
 def analyze_login_db(db_path, browser_user_data_path):
-    """
-    Extracts login credentials and decrypts the passwords.
-    browser_user_data_path is the root User Data folder (e.g., .../Chrome/User Data)
-    """
+    
     findings = []
 
     temp_db = safe_copy(db_path)
